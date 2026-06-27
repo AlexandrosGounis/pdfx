@@ -20,11 +20,36 @@ fileAssociations:
   - ext: pdfx
     name: PDFX Collection
     description: PDFX multi-document PDF collection
+    # mimeType drives the Linux file association (desktop MimeType + shared-mime
+    # XML); harmless on macOS/Windows, which key off ext/role.
+    mimeType: application/x-pdfx
     role: Viewer
 mac:
   category: public.app-category.productivity
 win:
   executableName: pdfx
+linux:
+  # AppImage runs on any distro without install; deb/rpm integrate with the
+  # system package manager. Flatpak ships separately (needs flatpak-builder) —
+  # see `build:linux:flatpak` and the README.
+  target:
+    - AppImage
+    - deb
+    - rpm
+  category: Office
+  # Required for deb/rpm; uses the upstream author's public contact.
+  maintainer: Alex Gounis <gounisalex@gmail.com>
+  synopsis: One file. Many documents. Still a PDF.
+  # Single line on purpose: electron-builder also uses this as the .desktop
+  # Comment, which must not wrap. StartupWMClass defaults to productName (PDFx).
+  description: An open, backwards-compatible PDF extension that bundles many documents into one valid PDF, plus a minimal desktop viewer that splits it back into the original files.
+  # Directory of NxN.png sizes (16–1024) so the desktop theme picks the right
+  # resolution for panels, menus, and the task switcher.
+  icon: build/icons
+flatpak:
+  # Pin to a current Freedesktop runtime + the Electron base app from Flathub.
+  runtimeVersion: '23.08'
+  baseVersion: '23.08'
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

@@ -19,7 +19,8 @@
     "build:unpack": "yarn build && electron-builder --dir",
     "build:win": "yarn build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "build:linux:flatpak": "electron-vite build && electron-builder --linux flatpak"
   },
   "dependencies": {
     "@electron-toolkit/preload": "3.0.2",

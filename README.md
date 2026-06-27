@@ -15,7 +15,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-2e7d32?style=flat-square)](LICENSE)
 &nbsp;
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-555?style=flat-square)](#)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-555?style=flat-square)](#)
 &nbsp;
 [![Format spec](https://img.shields.io/badge/format-spec-e08a00?style=flat-square)](SPEC.md)
 
@@ -29,7 +29,7 @@
 
 ## What it is
 
-PDFx is an open, backwards compatible extension of PDF that bundles many documents into a single file, plus a minimal desktop viewer for macOS and Windows.
+PDFx is an open, backwards compatible extension of PDF that bundles many documents into a single file, plus a minimal desktop viewer for macOS, Windows, and Linux.
 
 A `.pdfx` file is a fully valid PDF: open it anywhere and every page shows in sequence. Open it in PDFx and it splits back into the original documents. Plain single PDFs work as they are.
 
@@ -42,10 +42,21 @@ See [SPEC.md](SPEC.md) for the format. It is short: the entire trick is one embe
 Built with Electron, Vite, TypeScript, and React. PDF rendering by [pdf.js](https://mozilla.github.io/pdf.js/), assembly by [pdf-lib](https://pdf-lib.js.org/).
 
 ```bash
-yarn            # install
-yarn dev        # run in development
-yarn build:mac  # package for macOS
-yarn build:win  # package for Windows
+yarn              # install
+yarn dev          # run in development
+yarn build:mac    # package for macOS
+yarn build:win    # package for Windows
+yarn build:linux  # package for Linux (AppImage, deb, rpm)
+```
+
+On Linux the window uses a solid backdrop instead of the macOS liquid-glass
+effect; everything else is identical. `build:linux` produces an AppImage (runs
+on any distro) plus `.deb` and `.rpm` packages — `dpkg`/`rpmbuild` and standard
+build tools must be available. Flatpak is built separately and needs
+`flatpak` + `flatpak-builder` with Flathub configured:
+
+```bash
+yarn build:linux:flatpak  # package for Linux (Flatpak)
 ```
 
 ## License
