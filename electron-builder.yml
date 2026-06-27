@@ -46,6 +46,14 @@ linux:
   # Directory of NxN.png sizes (16–1024) so the desktop theme picks the right
   # resolution for panels, menus, and the task switcher.
   icon: build/icons
+# Custom post-install for both deb and rpm: force the Chromium setuid sandbox
+# helper to mode 4755 (see build/linux/after-install.tpl). Without it the package
+# installs but the app aborts at launch on systems that restrict unprivileged
+# user namespaces. Declared once as a YAML anchor and shared by both targets.
+deb:
+  afterInstall: &after-install build/linux/after-install.tpl
+rpm:
+  afterInstall: *after-install
 flatpak:
   # Pin to a current Freedesktop runtime + the Electron base app from Flathub.
   runtimeVersion: '23.08'
