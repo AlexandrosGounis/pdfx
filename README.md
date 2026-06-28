@@ -49,7 +49,7 @@ yarn build:win    # package for Windows
 yarn build:linux  # package for Linux
 ```
 
-Linux packaging notes (formats, Flatpak, prerequisites) live in [docs/LINUX_SETUP.md](docs/LINUX_SETUP.md).
+*Linux packaging notes (formats, Flatpak, prerequisites) live in [docs/LINUX_SETUP.md](docs/LINUX_SETUP.md).*
 
 ## License
 
