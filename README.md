@@ -46,18 +46,10 @@ yarn              # install
 yarn dev          # run in development
 yarn build:mac    # package for macOS
 yarn build:win    # package for Windows
-yarn build:linux  # package for Linux (AppImage, deb, rpm)
+yarn build:linux  # package for Linux
 ```
 
-On Linux the window uses a solid backdrop instead of the macOS liquid-glass
-effect; everything else is identical. `build:linux` produces an AppImage (runs
-on any distro) plus `.deb` and `.rpm` packages — `dpkg`/`rpmbuild` and standard
-build tools must be available. Flatpak is built separately and needs
-`flatpak` + `flatpak-builder` with Flathub configured:
-
-```bash
-yarn build:linux:flatpak  # package for Linux (Flatpak)
-```
+Linux packaging notes (formats, Flatpak, prerequisites) live in [docs/LINUX_SETUP.md](docs/LINUX_SETUP.md).
 
 ## License
 

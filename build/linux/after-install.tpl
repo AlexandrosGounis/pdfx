@@ -10,14 +10,8 @@ else
     ln -sf '/opt/${sanitizedProductName}/${executable}' '/usr/bin/${executable}'
 fi
 
-# Chromium's setuid sandbox helper must be owned by root with mode 4755.
-# electron-builder's default template only sets this when the *install-time*
-# user (root, running apt/dnf) cannot create a user namespace. On Debian/Ubuntu
-# an unprivileged user is often blocked from user namespaces even though root is
-# not, so that heuristic leaves the helper at 0755 and the app then aborts at
-# launch with "The SUID sandbox helper binary ... is not configured correctly".
-# Setting it unconditionally is the robust choice: Electron uses the namespace
-# sandbox when it can and falls back to this helper otherwise.
+# Force the Chromium setuid sandbox helper to root:root 4755 (see
+# docs/LINUX_SETUP.md for why this is unconditional).
 chown root:root '/opt/${sanitizedProductName}/chrome-sandbox' || true
 chmod 4755 '/opt/${sanitizedProductName}/chrome-sandbox' || true
 
