@@ -20,11 +20,28 @@ fileAssociations:
   - ext: pdfx
     name: PDFX Collection
     description: PDFX multi-document PDF collection
+    mimeType: application/x-pdfx
     role: Viewer
 mac:
   category: public.app-category.productivity
 win:
   executableName: pdfx
+linux:
+  target:
+    - AppImage
+    - deb
+    - rpm
+  category: Office
+  maintainer: Alex Gounis <gounisalex@gmail.com>
+  synopsis: One file. Many documents. Still a PDF.
+  description: An open, backwards-compatible PDF extension that bundles many documents into one valid PDF, plus a minimal desktop viewer that splits it back into the original files.
+deb:
+  afterInstall: &after-install build/linux/after-install.tpl
+rpm:
+  afterInstall: *after-install
+flatpak:
+  runtimeVersion: '23.08'
+  baseVersion: '23.08'
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
