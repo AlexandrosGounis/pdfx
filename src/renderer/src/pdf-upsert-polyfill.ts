@@ -1,8 +1,3 @@
-// pdf.js 5.x calls the TC39 "upsert" helpers Map.prototype.getOrInsert /
-// getOrInsertComputed, which some Electron/V8 builds do not yet ship natively.
-// This must run in EVERY realm that executes pdf.js code — the renderer main
-// thread AND the pdf.js Worker thread (separate global scope). Importing this as
-// a side-effect module guarantees the patch is applied before pdf.js runs.
 const mapProto = Map.prototype as unknown as Record<string, unknown>
 
 if (typeof mapProto.getOrInsertComputed !== 'function') {
