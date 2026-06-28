@@ -7,7 +7,6 @@ interface ToolbarProps {
   onZoomOut: () => void
   onZoomReset: () => void
   onOpen: () => void
-  onExport: () => void
   onExportPdf: () => void
   onExportZip: () => void
 }
@@ -23,7 +22,6 @@ export function Toolbar({
   onZoomOut,
   onZoomReset,
   onOpen,
-  onExport,
   onExportPdf,
   onExportZip
 }: ToolbarProps): React.JSX.Element {
@@ -74,14 +72,11 @@ export function Toolbar({
       <button className="btn glass" onClick={onOpen} disabled={busy}>
         Open
       </button>
-      <button className="btn glass" onClick={onExport} disabled={busy || documentCount === 0}>
-        Export .pdfx
-      </button>
       <button className="btn glass" onClick={onExportPdf} disabled={busy || documentCount === 0}>
         Export PDF
       </button>
       <button className="btn glass" onClick={onExportZip} disabled={busy || documentCount === 0}>
-        Export zip
+        Export ZIP
       </button>
     </header>
   )

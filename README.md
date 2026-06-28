@@ -33,7 +33,7 @@ PDFx is an open, backwards compatible extension of PDF that bundles many documen
 
 A `.pdfx` file is a fully valid PDF: open it anywhere and every page shows in sequence. Open it in PDFx and it splits back into the original documents. Plain single PDFs work as they are.
 
-Drag and drop `.pdf` or `.pdfx` files anywhere in the window. Each document renders as a horizontal strip of pages, and documents stack vertically. Reorder or remove them, then **Export .pdfx** to save the whole collection as one file.
+Drag and drop `.pdf` or `.pdfx` files anywhere in the window. Each document renders as a horizontal strip of pages, and documents stack vertically. Reorder or remove them, then **Export PDF** to save the whole collection as one file.
 
 See [SPEC.md](SPEC.md) for the format. It is short: the entire trick is one embedded JSON manifest.
 
@@ -49,7 +49,7 @@ yarn build:win    # package for Windows
 yarn build:linux  # package for Linux
 ```
 
-Linux packaging notes (formats, Flatpak, prerequisites) live in [docs/LINUX_SETUP.md](docs/LINUX_SETUP.md).
+*Linux packaging notes (formats, Flatpak, prerequisites) live in [docs/LINUX_SETUP.md](docs/LINUX_SETUP.md).*
 
 ## License
 

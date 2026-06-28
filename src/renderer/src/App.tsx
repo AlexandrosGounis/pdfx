@@ -104,7 +104,6 @@ export default function App(): React.JSX.Element {
         onZoomOut={() => canvasRef.current?.zoomOut()}
         onZoomReset={() => canvasRef.current?.reset()}
         onOpen={openViaDialog}
-        onExport={() => exportCollection('pdfx')}
         onExportPdf={() => exportCollection('pdf')}
         onExportZip={exportZip}
       />
