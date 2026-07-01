@@ -251,6 +251,149 @@ body {
   cursor: default;
 }
 
+.findbar {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 6px 0 12px;
+  border-radius: 999px;
+  background: var(--overlay-strong);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px var(--hairline);
+  -webkit-app-region: no-drag;
+  animation: findbar-in 0.16s ease;
+}
+
+@keyframes findbar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.findbar-icon {
+  display: flex;
+  color: var(--ink-faint);
+}
+
+.findbar-input {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 200px;
+  padding: 0;
+}
+
+.findbar-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.findbar-count {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.findbar-status {
+  font-size: 12px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  animation: findbar-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes findbar-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.findbar-lang {
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--hover);
+  border: none;
+  border-radius: 6px;
+  padding: 3px 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+.findbar .icon-btn {
+  width: 24px;
+  height: 24px;
+}
+
+.doc-row,
+.page {
+  transition:
+    opacity 0.15s ease,
+    filter 0.15s ease;
+}
+
+.doc-row.dimmed,
+.page.dimmed {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+.find-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: clip;
+  line-height: 1;
+  text-align: initial;
+  transform-origin: 0 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+
+.find-layer > span {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  transform-origin: 0 0;
+  --font-height: 0;
+  --scale-x: 1;
+  --rotate: 0deg;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+
+.find-hit {
+  border-radius: 1px;
+  background-color: #ffd54a;
+}
+
+.ocr-highlight-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: clip;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.ocr-highlight {
+  position: absolute;
+  border-radius: 1px;
+  background-color: #ffd54a;
+}
+
 .canvas-viewport {
   position: relative;
   flex: 1;

@@ -19,3 +19,5 @@ native/build/
 *.pfx
 *.keystore
 *.mobileprovision
+
+resources/ocr

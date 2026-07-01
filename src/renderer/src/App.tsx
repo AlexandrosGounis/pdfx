@@ -11,6 +11,10 @@ import { useImport } from './app/useImport'
 import { usePaste } from './app/usePaste'
 import { useDragController } from './app/useDragController'
 import { useKeyboardShortcuts } from './app/useKeyboardShortcuts'
+import { useFind } from './app/useFind'
+import { useSearchIndex } from './search/useSearchIndex'
+import { FindProvider } from './search/FindContext'
+import { FindBar } from './components/FindBar'
 
 const TOAST_MS = 4000
 
@@ -32,6 +36,19 @@ export default function App(): React.JSX.Element {
   const fullViewState = useFullView()
   const docs = collection.docs
   const layout = useMemo(() => computeLayout(docs), [docs])
+
+  const searchIndex = useSearchIndex(docs)
+  const find = useFind(searchIndex.search, searchIndex.version)
+  const findState = useMemo(
+    () => ({
+      active: find.active,
+      query: find.matchedQuery,
+      matchingDocIds: find.result.docIds,
+      matchingPageIds: find.result.pageIds,
+      getOcrWords: searchIndex.getOcrWords
+    }),
+    [find.active, find.matchedQuery, find.result, searchIndex.getOcrWords]
+  )
 
   const { exportCollection, exportZip } = useExport(docs, setBusy, flash)
   const { addFiles, openViaDialog, addPagesToDoc, handleExternalDropFiles } = useImport(
@@ -56,7 +73,10 @@ export default function App(): React.JSX.Element {
     onDeletePage: collection.deletePage,
     onCopy: collection.copySelected,
     onPaste,
-    onClearSelection: collection.clearSelection
+    onClearSelection: collection.clearSelection,
+    findOpen: find.open,
+    onOpenFind: find.openFind,
+    onCloseFind: find.closeFind
   })
 
   const onScaleChange = useCallback((next: number) => setScale(next), [])
@@ -86,68 +106,83 @@ export default function App(): React.JSX.Element {
   const fullViewDoc = fullView ? docs.find((d) => d.id === fullView.docId) : undefined
 
   return (
-    <div
-      className={
-        'app' + (drag.committing ? ' committing' : '') + (drag.dragKind ? ' dragging' : '')
-      }
-      onDragEnter={drag.handlers.onDragEnter}
-      onDragOver={drag.handlers.onDragOver}
-      onDragLeave={drag.handlers.onDragLeave}
-      onDrop={drag.handlers.onDrop}
-    >
-      <Toolbar
-        documentCount={docs.length}
-        pageCount={totalPages}
-        busy={busy}
-        zoom={scale}
-        onZoomIn={() => canvasRef.current?.zoomIn()}
-        onZoomOut={() => canvasRef.current?.zoomOut()}
-        onZoomReset={() => canvasRef.current?.reset()}
-        onOpen={openViaDialog}
-        onExportPdf={() => exportCollection('pdf')}
-        onExportZip={exportZip}
-      />
-
-      <CollectionCanvas
-        docs={docs}
-        layout={layout}
-        busy={busy}
-        pagesDraggable={totalPages >= 2}
-        renderVersion={renderVersion}
-        selected={collection.selected}
-        hiddenPageId={fullViewState.hiddenPageId}
-        dragKind={drag.dragKind}
-        draggingPage={drag.draggingPage}
-        dropTarget={drag.dropTarget}
-        collapsedId={drag.collapsedId}
-        externalCount={drag.externalCount}
-        canvasRef={canvasRef}
-        onScaleChange={onScaleChange}
-        onSettle={onSettle}
-        onBackgroundClick={collection.clearSelection}
-        onOpen={openViaDialog}
-        onSelectPage={collection.selectPage}
-        onOpenPage={fullViewState.openPage}
-        onPageDragStart={drag.startPageDrag}
-        onPageDragEnd={drag.clearDrag}
-        onAddPage={addPagesToDoc}
-        onMoveDoc={collection.moveDoc}
-        onRemoveDoc={collection.removeDoc}
-        onRenameDoc={collection.renameDoc}
-      />
-
-      {fullView && fullViewDoc && (
-        <FullView
-          docs={docs}
-          startDocId={fullView.docId}
-          startPageId={fullView.pageId}
-          originRect={fullView.originRect}
-          onActivePageChange={fullViewState.setHiddenPageId}
-          onClose={fullViewState.closeFullView}
+    <FindProvider value={findState}>
+      <div
+        className={
+          'app' + (drag.committing ? ' committing' : '') + (drag.dragKind ? ' dragging' : '')
+        }
+        onDragEnter={drag.handlers.onDragEnter}
+        onDragOver={drag.handlers.onDragOver}
+        onDragLeave={drag.handlers.onDragLeave}
+        onDrop={drag.handlers.onDrop}
+      >
+        <Toolbar
+          documentCount={docs.length}
+          pageCount={totalPages}
+          busy={busy}
+          zoom={scale}
+          onZoomIn={() => canvasRef.current?.zoomIn()}
+          onZoomOut={() => canvasRef.current?.zoomOut()}
+          onZoomReset={() => canvasRef.current?.reset()}
+          onOpen={openViaDialog}
+          onExportPdf={() => exportCollection('pdf')}
+          onExportZip={exportZip}
         />
-      )}
 
-      {toast && <div className="toast">{toast}</div>}
-    </div>
+        {find.open && (
+          <FindBar
+            query={find.query}
+            result={find.result}
+            ocrRemaining={searchIndex.ocrRemaining}
+            hasScanned={searchIndex.hasScanned}
+            ocrLanguage={searchIndex.ocrLanguage}
+            onQuery={find.setQuery}
+            onOcrLanguage={searchIndex.setOcrLanguage}
+            onClose={find.closeFind}
+          />
+        )}
+
+        <CollectionCanvas
+          docs={docs}
+          layout={layout}
+          busy={busy}
+          pagesDraggable={totalPages >= 2}
+          renderVersion={renderVersion}
+          selected={collection.selected}
+          hiddenPageId={fullViewState.hiddenPageId}
+          dragKind={drag.dragKind}
+          draggingPage={drag.draggingPage}
+          dropTarget={drag.dropTarget}
+          collapsedId={drag.collapsedId}
+          externalCount={drag.externalCount}
+          canvasRef={canvasRef}
+          onScaleChange={onScaleChange}
+          onSettle={onSettle}
+          onBackgroundClick={collection.clearSelection}
+          onOpen={openViaDialog}
+          onSelectPage={collection.selectPage}
+          onOpenPage={fullViewState.openPage}
+          onPageDragStart={drag.startPageDrag}
+          onPageDragEnd={drag.clearDrag}
+          onAddPage={addPagesToDoc}
+          onMoveDoc={collection.moveDoc}
+          onRemoveDoc={collection.removeDoc}
+          onRenameDoc={collection.renameDoc}
+        />
+
+        {fullView && fullViewDoc && (
+          <FullView
+            docs={docs}
+            startDocId={fullView.docId}
+            startPageId={fullView.pageId}
+            originRect={fullView.originRect}
+            onActivePageChange={fullViewState.setHiddenPageId}
+            onClose={fullViewState.closeFullView}
+          />
+        )}
+
+        {toast && <div className="toast">{toast}</div>}
+      </div>
+    </FindProvider>
   )
 }

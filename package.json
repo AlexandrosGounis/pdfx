@@ -15,7 +15,7 @@
     "start": "electron-vite preview",
     "dev": "electron-vite dev --watch",
     "build": "yarn typecheck && electron-vite build",
-    "postinstall": "electron-builder install-app-deps && yarn build:native",
+    "postinstall": "electron-builder install-app-deps && yarn build:native && node scripts/copy-ocr-assets.mjs",
     "build:unpack": "yarn build && electron-builder --dir",
     "build:win": "yarn build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
@@ -24,15 +24,21 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "3.0.2",
-    "@electron-toolkit/utils": "4.0.0"
+    "@electron-toolkit/utils": "4.0.0",
+    "tesseract.js": "7.0.0",
+    "tesseract.js-core": "7.0.0"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "1.0.1",
+    "@tesseract.js-data/deu": "1.0.0",
+    "@tesseract.js-data/eng": "1.0.0",
+    "@tesseract.js-data/fra": "1.0.0",
+    "@tesseract.js-data/spa": "1.0.0",
+    "@types/d3-selection": "3.0.11",
+    "@types/d3-zoom": "3.0.8",
     "@types/node": "22.19.21",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "@types/d3-selection": "3.0.11",
-    "@types/d3-zoom": "3.0.8",
     "@vitejs/plugin-react": "4.7.0",
     "d3-selection": "3.0.0",
     "d3-zoom": "3.0.0",

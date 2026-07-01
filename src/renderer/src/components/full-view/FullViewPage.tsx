@@ -1,5 +1,6 @@
 import type { PageEntry } from '../../types'
 import { PageView } from '../PageView'
+import { useFindState } from '../../search/FindContext'
 import type { View } from './geometry'
 import { DOUBLE_CLICK_ZOOM, fitInto, TRANSITION_MS } from './geometry'
 
@@ -21,6 +22,9 @@ interface FullViewPageProps {
 export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
   const { page: p, viewport, isCurrent, view, zoomed, interactive, animating } = props
   const { flip, flipTransition, renderVersion, resetView, applyZoom } = props
+
+  const { active, query, matchingPageIds, getOcrWords } = useFindState()
+  const highlight = active && isCurrent && matchingPageIds.has(p.id)
 
   const size = fitInto(p.width, p.height, viewport)
   let style: React.CSSProperties = { width: size.w, height: size.h }
@@ -63,6 +67,8 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
           naturalHeight={p.height}
           version={isCurrent ? renderVersion : 0}
           eager={isCurrent}
+          highlightQuery={highlight ? query : undefined}
+          ocrWords={highlight ? getOcrWords(`${p.source.id}:${p.pageIndex}`) : undefined}
         />
       </div>
     </div>

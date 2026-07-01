@@ -3,6 +3,7 @@ import type { DocEntry } from '../types'
 import { ADD_PAGE_WIDTH } from '../canvas/layout'
 import { AddPageGhost, GhostPage } from './DropGhost'
 import { PageCell } from './page-cell'
+import { useFindState } from '../search/FindContext'
 
 interface DocumentRowProps {
   doc: DocEntry
@@ -35,6 +36,9 @@ function DocumentRowImpl({
   onPageDragEnd,
   onAddPage
 }: DocumentRowProps): React.JSX.Element {
+  const { active, query, matchingDocIds, matchingPageIds, getOcrWords } = useFindState()
+  const docDimmed = active && !matchingDocIds.has(doc.id)
+
   const strip: React.JSX.Element[] = []
   let visible = 0
   const emitGhost = (): void => {
@@ -46,6 +50,7 @@ function DocumentRowImpl({
   }
   for (const page of doc.pages) {
     const collapsed = page.id === collapseId
+    const matches = active && matchingPageIds.has(page.id)
     if (!collapsed) emitGhost()
     strip.push(
       <PageCell
@@ -57,6 +62,9 @@ function DocumentRowImpl({
         selected={page.id === selectedPageId}
         collapsed={collapsed}
         hidden={page.id === hiddenPageId}
+        dimmed={active && !docDimmed && !matchingPageIds.has(page.id)}
+        highlightQuery={matches ? query : undefined}
+        ocrWords={matches ? getOcrWords(`${page.source.id}:${page.pageIndex}`) : undefined}
         pagesDraggable={pagesDraggable}
         visibleNumber={visible + 1}
         onSelectPage={onSelectPage}
@@ -78,7 +86,7 @@ function DocumentRowImpl({
   )
 
   return (
-    <section className="doc-row">
+    <section className={docDimmed ? 'doc-row dimmed' : 'doc-row'}>
       <div className="page-strip">
         <div className="page-strip-inner">{strip}</div>
       </div>

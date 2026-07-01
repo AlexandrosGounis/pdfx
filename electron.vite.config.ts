@@ -19,8 +19,12 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        '@renderer': resolve('src/renderer/src')
+        '@renderer': resolve('src/renderer/src'),
+        'tesseract.js': 'tesseract.js/dist/tesseract.esm.min.js'
       }
+    },
+    worker: {
+      format: 'es'
     },
     plugins: [react()]
   }

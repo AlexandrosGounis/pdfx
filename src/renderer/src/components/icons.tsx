@@ -85,6 +85,15 @@ export function MinusIcon(props: IconProps): React.JSX.Element {
   )
 }
 
+export function SearchIcon(props: IconProps): React.JSX.Element {
+  return (
+    <Icon {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </Icon>
+  )
+}
+
 export function ImportArrowIcon(props: IconProps): React.JSX.Element {
   return (
     <Icon {...props}>

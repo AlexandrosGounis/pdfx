@@ -8,6 +8,9 @@ interface KeyboardShortcutDeps {
   onCopy: () => void
   onPaste: () => void
   onClearSelection: () => void
+  findOpen: boolean
+  onOpenFind: () => void
+  onCloseFind: () => void
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -21,12 +24,25 @@ export function useKeyboardShortcuts({
   onDeletePage,
   onCopy,
   onPaste,
-  onClearSelection
+  onClearSelection,
+  findOpen,
+  onOpenFind,
+  onCloseFind
 }: KeyboardShortcutDeps): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (!active || isEditableTarget(event.target)) return
       const mod = event.metaKey || event.ctrlKey
+      if (mod && event.key.toLowerCase() === 'f') {
+        event.preventDefault()
+        onOpenFind()
+        return
+      }
+      if (active && findOpen && event.key === 'Escape') {
+        event.preventDefault()
+        onCloseFind()
+        return
+      }
+      if (!active || isEditableTarget(event.target)) return
       if ((event.key === 'Backspace' || event.key === 'Delete') && selected) {
         event.preventDefault()
         onDeletePage(selected)
@@ -40,5 +56,15 @@ export function useKeyboardShortcuts({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [active, selected, onDeletePage, onCopy, onPaste, onClearSelection])
+  }, [
+    active,
+    selected,
+    onDeletePage,
+    onCopy,
+    onPaste,
+    onClearSelection,
+    findOpen,
+    onOpenFind,
+    onCloseFind
+  ])
 }

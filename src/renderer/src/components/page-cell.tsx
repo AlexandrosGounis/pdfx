@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import type { PageEntry } from '../types'
+import type { OcrWord } from '../ocr/types'
 import { pageDisplayWidth } from '../canvas/layout'
 import { PageView } from './PageView'
 import { buildPageDragImage } from './page-drag-image'
@@ -12,6 +13,9 @@ interface PageCellProps {
   selected: boolean
   collapsed: boolean
   hidden: boolean
+  dimmed: boolean
+  highlightQuery: string | undefined
+  ocrWords: OcrWord[] | undefined
   pagesDraggable: boolean
   visibleNumber: number
   onSelectPage: (docId: string, pageId: string) => void
@@ -28,6 +32,9 @@ function PageCellImpl({
   selected,
   collapsed,
   hidden,
+  dimmed,
+  highlightQuery,
+  ocrWords,
   pagesDraggable,
   visibleNumber,
   onSelectPage,
@@ -38,7 +45,12 @@ function PageCellImpl({
   return (
     <div
       data-page-id={page.id}
-      className={'page' + (selected ? ' selected' : '') + (collapsed ? ' collapsing' : '')}
+      className={
+        'page' +
+        (selected ? ' selected' : '') +
+        (collapsed ? ' collapsing' : '') +
+        (dimmed ? ' dimmed' : '')
+      }
       style={
         collapsed
           ? {
@@ -81,6 +93,8 @@ function PageCellImpl({
         naturalWidth={page.width}
         naturalHeight={page.height}
         version={renderVersion}
+        highlightQuery={highlightQuery}
+        ocrWords={ocrWords}
       />
       <span className="page-number">{visibleNumber}</span>
     </div>

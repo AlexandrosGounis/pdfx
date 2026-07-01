@@ -14,8 +14,12 @@ files:
   # Ship only the compiled native addon, not its sources or build tree.
   - '!native/**'
   - 'native/build/Release/*.node'
+  - '!resources/**'
 asarUnpack:
   - native/build/Release/*.node
+extraResources:
+  - from: resources/ocr
+    to: ocr
 fileAssociations:
   - ext: pdfx
     name: PDFX Collection
