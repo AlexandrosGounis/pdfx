@@ -24,9 +24,7 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "3.0.2",
-    "@electron-toolkit/utils": "4.0.0",
-    "tesseract.js": "7.0.0",
-    "tesseract.js-core": "7.0.0"
+    "@electron-toolkit/utils": "4.0.0"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "1.0.1",
@@ -53,6 +51,8 @@
     "prettier": "3.8.4",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "tesseract.js": "7.0.0",
+    "tesseract.js-core": "7.0.0",
     "typescript": "5.9.3",
     "vite": "7.3.5"
   }

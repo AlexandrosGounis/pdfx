@@ -54,6 +54,8 @@ export function createSearchEngine({
   const scanned = new Set<string>()
   const ocrQueued = new Set<string>()
   const ocrQueue: OcrJob[] = []
+  const pagesBySource = new Map<string, Set<string>>()
+  const sourceRef = new Map<string, OcrJob>()
 
   let ocrInFlight = 0
   let jobSeq = 0
@@ -75,23 +77,10 @@ export function createSearchEngine({
   }
 
   function applySource(key: string): void {
+    const ids = pagesBySource.get(key)
+    if (!ids) return
     const text = effective(key)
-    for (const doc of getDocs()) {
-      for (const page of doc.pages) {
-        if (sourceKeyOf(page) === key) pageText.set(page.id, text)
-      }
-    }
-  }
-
-  function findSourcePage(key: string): OcrJob | null {
-    for (const doc of getDocs()) {
-      for (const page of doc.pages) {
-        if (sourceKeyOf(page) === key) {
-          return { key, pdf: page.source.pdf, pageIndex: page.pageIndex }
-        }
-      }
-    }
-    return null
+    for (const id of ids) pageText.set(id, text)
   }
 
   function enqueueOcr(job: OcrJob): void {
@@ -111,6 +100,7 @@ export function createSearchEngine({
       ensureClient()
         .recognize(job.pdf, job.pageIndex, jobId)
         .then(({ text, words }) => {
+          if (!pagesBySource.has(job.key)) return
           sourceOcr.set(job.key, normalizeText(text))
           sourceOcrWords.set(job.key, words)
           applySource(job.key)
@@ -167,11 +157,20 @@ export function createSearchEngine({
         []
       let changed = false
 
+      pagesBySource.clear()
+      sourceRef.clear()
+
       for (const doc of docs) {
         for (const page of doc.pages) {
           presentPages.add(page.id)
           const key = sourceKeyOf(page)
           presentKeys.add(key)
+          let ids = pagesBySource.get(key)
+          if (!ids) pagesBySource.set(key, (ids = new Set()))
+          ids.add(page.id)
+          if (!sourceRef.has(key)) {
+            sourceRef.set(key, { key, pdf: page.source.pdf, pageIndex: page.pageIndex })
+          }
           if (pageText.has(page.id)) continue
           if (sourceBorn.has(key)) {
             pageText.set(page.id, effective(key))
@@ -194,6 +193,16 @@ export function createSearchEngine({
         if (!presentPages.has(id)) {
           pageText.delete(id)
           changed = true
+        }
+      }
+
+      for (const key of [...sourceBorn.keys()]) {
+        if (!presentKeys.has(key)) {
+          sourceBorn.delete(key)
+          sourceOcr.delete(key)
+          sourceOcrWords.delete(key)
+          scanned.delete(key)
+          ocrQueued.delete(key)
         }
       }
 
@@ -243,7 +252,7 @@ export function createSearchEngine({
       ocrQueue.length = 0
       for (const key of scanned) {
         applySource(key)
-        const job = findSourcePage(key)
+        const job = sourceRef.get(key)
         if (job) enqueueOcr(job)
       }
       reportProgress()

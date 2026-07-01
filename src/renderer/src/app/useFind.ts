@@ -40,7 +40,16 @@ export function useFind(search: (query: string) => SearchResult, version: number
       setMatchedQuery(query)
     }, DEBOUNCE_MS)
     return () => clearTimeout(timer)
-  }, [active, query, version, search])
+  }, [active, query, search])
+
+  useEffect(() => {
+    if (!active) return
+    const timer = setTimeout(() => {
+      setResult(search(query))
+      setMatchedQuery(query)
+    }, DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [version])
 
   const openFind = useCallback(() => setOpen(true), [])
   const closeFind = useCallback(() => {

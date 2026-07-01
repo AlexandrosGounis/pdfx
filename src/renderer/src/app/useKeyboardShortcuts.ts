@@ -32,7 +32,7 @@ export function useKeyboardShortcuts({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
       const mod = event.metaKey || event.ctrlKey
-      if (mod && event.key.toLowerCase() === 'f') {
+      if (mod && event.key.toLowerCase() === 'f' && !isEditableTarget(event.target)) {
         event.preventDefault()
         onOpenFind()
         return
