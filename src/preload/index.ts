@@ -15,6 +15,27 @@ export interface SaveFilter {
   extensions: string[]
 }
 
+export type MarkRole = 'signature' | 'initials'
+export type MarkKind = 'draw' | 'type' | 'image'
+export interface MarkInput {
+  role: MarkRole
+  kind: MarkKind
+  width: number
+  height: number
+  label?: string
+  png: Uint8Array
+}
+export interface StoredMark {
+  id: string
+  role: MarkRole
+  kind: MarkKind
+  width: number
+  height: number
+  label?: string
+  createdAt: string
+  png: Uint8Array
+}
+
 const api = {
   platform: process.platform,
   rendererReady: (): Promise<void> => ipcRenderer.invoke('pdfx:renderer-ready'),
@@ -37,6 +58,11 @@ const api = {
   writeFile: (path: string, data: Uint8Array): Promise<string> =>
     ipcRenderer.invoke('pdfx:write-file', path, data),
   openFiles: (): Promise<OpenedFile[]> => ipcRenderer.invoke('pdfx:open-files'),
+  marks: {
+    list: (): Promise<StoredMark[]> => ipcRenderer.invoke('pdfx:marks-list'),
+    save: (input: MarkInput): Promise<StoredMark> => ipcRenderer.invoke('pdfx:marks-save', input),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke('pdfx:marks-remove', id)
+  },
   onFilesOpened: (callback: (files: OpenedFile[]) => void): (() => void) => {
     const listener = (_event: Electron.IpcRendererEvent, files: OpenedFile[]): void =>
       callback(files)

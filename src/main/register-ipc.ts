@@ -1,5 +1,5 @@
-import { ipcMain, dialog, clipboard } from 'electron'
-import { basename, isAbsolute } from 'path'
+import { ipcMain, dialog, clipboard, app } from 'electron'
+import { basename, isAbsolute, join } from 'path'
 import { existsSync } from 'fs'
 import { writeFile } from 'fs/promises'
 import { markupToPdf } from './markup'
@@ -7,6 +7,7 @@ import { OpenedFile, IMPORTABLE, readFiles, expandDropPaths } from './file-intak
 import { clipboardFilePaths } from './clipboard'
 import { readResource } from './resource'
 import { getMainWindow, setRendererReady, sendOpenPaths } from './window'
+import { createMarkStore } from './marks'
 
 const MAX_WRITE_BYTES = 1024 * 1024 * 1024 // 1 GiB cap on a single IPC write
 
@@ -111,4 +112,9 @@ export function registerIpc(getPending: () => string[], clearPending: () => void
     if (result.canceled) return []
     return readFiles(result.filePaths)
   })
+
+  const marks = createMarkStore(join(app.getPath('userData'), 'signatures'))
+  ipcMain.handle('pdfx:marks-list', () => marks.list())
+  ipcMain.handle('pdfx:marks-save', (_event, input) => marks.save(input))
+  ipcMain.handle('pdfx:marks-remove', (_event, id: string) => marks.remove(id))
 }
