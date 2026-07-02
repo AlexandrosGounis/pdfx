@@ -34,6 +34,7 @@ describe('keyOutWhiteAndTrim', () => {
     const blank: RgbaImage = { data: new Uint8ClampedArray(16), width: 2, height: 2 }
     blank.data.fill(255)
     const out = keyOutWhiteAndTrim(blank)
+    expect(out).toBe(blank)
     expect(out.width).toBe(2)
     expect(out.height).toBe(2)
   })
