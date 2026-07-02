@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 import { degrees, type PDFFont, type PDFImage, type PDFPage } from 'pdf-lib'
 import { mapPlacementToUserSpace, type Rotation, type VisualBox } from './sign/coords'
+import { isTextPlacement } from './sign/text-placement'
 import type { Placement, StampAssets } from './sign/types'
 
 function normalizeRotation(angle: number): Rotation {
@@ -23,9 +24,17 @@ function visualBox(page: PDFPage): VisualBox {
   }
 }
 
+export interface StampSkip {
+  placementId: string
+  reason: 'no_asset_id' | 'missing_asset' | 'embed_failed' | 'missing_font' | 'missing_text'
+}
+
 /**
  * Draw each placement onto `page`. Image marks (signature/initials) are embedded once per
  * asset id via `embedCache`; `date` marks are drawn as text (requires `font`).
+ *
+ * Never throws on a bad/missing asset — placements that can't be rendered are recorded in the
+ * returned `StampSkip[]` instead so callers can surface them without aborting the export.
  */
 export async function stampPage(
   page: PDFPage,
@@ -33,15 +42,23 @@ export async function stampPage(
   assets: StampAssets,
   embedCache: Map<string, PDFImage>,
   font?: PDFFont
-): Promise<void> {
-  if (placements.length === 0) return
+): Promise<StampSkip[]> {
+  const skipped: StampSkip[] = []
+  if (placements.length === 0) return skipped
   const box = visualBox(page)
   const doc = page.doc
 
   for (const p of placements) {
     const rect = mapPlacementToUserSpace(p, box)
-    if (p.kind === 'date' || (p.kind === 'initials' && !p.assetId)) {
-      if (!font || !p.text) continue
+    if (isTextPlacement(p)) {
+      if (!font) {
+        skipped.push({ placementId: p.id, reason: 'missing_font' })
+        continue
+      }
+      if (!p.text) {
+        skipped.push({ placementId: p.id, reason: 'missing_text' })
+        continue
+      }
       page.drawText(p.text, {
         x: rect.x,
         y: rect.y,
@@ -52,12 +69,23 @@ export async function stampPage(
       continue
     }
     // image mark (signature / initials)
-    if (!p.assetId) continue
+    if (!p.assetId) {
+      skipped.push({ placementId: p.id, reason: 'no_asset_id' })
+      continue
+    }
     const asset = assets.get(p.assetId)
-    if (!asset) continue // missing asset — skip (caller surfaces a toast)
+    if (!asset) {
+      skipped.push({ placementId: p.id, reason: 'missing_asset' })
+      continue
+    }
     let img = embedCache.get(p.assetId)
     if (!img) {
-      img = await doc.embedPng(asset.png)
+      try {
+        img = await doc.embedPng(asset.png)
+      } catch {
+        skipped.push({ placementId: p.id, reason: 'embed_failed' })
+        continue
+      }
       embedCache.set(p.assetId, img)
     }
     page.drawImage(img, {
@@ -68,4 +96,5 @@ export async function stampPage(
       rotate: degrees(rect.rotate)
     })
   }
+  return skipped
 }

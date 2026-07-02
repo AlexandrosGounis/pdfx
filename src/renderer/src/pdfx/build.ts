@@ -3,13 +3,10 @@ import { PDFDocument, StandardFonts } from 'pdf-lib'
 import { MANIFEST_NAME, PDFX_VERSION } from './format'
 import type { ExportDocument, ExportPage, PdfxManifest } from './format'
 import { stampPage } from './stamp'
-import type { Placement, StampAssets } from './sign/types'
+import { isTextPlacement } from './sign/text-placement'
+import type { StampAssets } from './sign/types'
 
 const EMPTY_ASSETS: StampAssets = new Map()
-
-// A placement that renders as text (needs an embedded font).
-const isTextPlacement = (p: Placement): boolean =>
-  p.kind === 'date' || (p.kind === 'initials' && !p.assetId)
 
 export async function buildPdf(
   pages: ExportPage[],
@@ -28,6 +25,7 @@ export async function buildPdf(
     }
     const [copied] = await output.copyPages(source, [page.pageIndex])
     output.addPage(copied)
+    // stampPage returns skipped placements; Plan 4 will surface them to the user
     if (page.placements?.length) await stampPage(copied, page.placements, assets, embedCache, font)
   }
   output.setProducer(`PDFX ${PDFX_VERSION}`)
@@ -56,6 +54,7 @@ export async function buildPdfx(
       }
       const [copied] = await output.copyPages(source, [page.pageIndex])
       output.addPage(copied)
+      // stampPage returns skipped placements; Plan 4 will surface them to the user
       if (page.placements?.length) await stampPage(copied, page.placements, assets, embedCache, font)
     }
     manifest.documents.push({ name: doc.name, pages: doc.pages.length })
