@@ -25,6 +25,7 @@ export interface ExportPage {
   bytes: Uint8Array
   sourceKey: string
   pageIndex: number
+  placements?: import('./sign/types').Placement[]
 }
 
 export interface ExportDocument {
