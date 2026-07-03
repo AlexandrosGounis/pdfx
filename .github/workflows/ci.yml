@@ -1,0 +1,44 @@
+name: CI
+
+# Minimal cross-platform gate: confirm the app typechecks, bundles, and its unit
+# tests pass on Linux, macOS, and Windows — before a branch is merged. Kept light
+# on purpose (no packaging / no native rebuild / no app launch).
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: build & test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      # --ignore-scripts skips the postinstall (electron-builder native rebuild,
+      # macOS glass addon, OCR asset staging). None of it is needed to typecheck,
+      # bundle, or run the jsdom unit tests — and skipping it keeps the check fast
+      # and free of native-toolchain flakiness across the three OSes.
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      # `yarn build` runs typecheck (node + web) then electron-vite build, so a
+      # bundling break on any platform fails here.
+      - name: Typecheck + build
+        run: yarn build
+
+      - name: Unit tests
+        run: yarn test
