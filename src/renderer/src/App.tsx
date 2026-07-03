@@ -15,6 +15,7 @@ import { useFind } from './app/useFind'
 import { useSearchIndex } from './search/useSearchIndex'
 import { FindProvider } from './search/FindContext'
 import { FindBar } from './components/FindBar'
+import { SignatureCapture } from './components/signing/SignatureCapture'
 
 const TOAST_MS = 4000
 
@@ -23,6 +24,7 @@ export default function App(): React.JSX.Element {
   const [scale, setScale] = useState(1)
   const [renderVersion, setRenderVersion] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
+  const [showSignatures, setShowSignatures] = useState(false)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const canvasRef = useRef<CanvasHandle | null>(null)
 
@@ -127,6 +129,7 @@ export default function App(): React.JSX.Element {
           onOpen={openViaDialog}
           onExportPdf={() => exportCollection('pdf')}
           onExportZip={exportZip}
+          onOpenSignatures={() => setShowSignatures(true)}
         />
 
         {find.open && (
@@ -180,6 +183,8 @@ export default function App(): React.JSX.Element {
             onClose={fullViewState.closeFullView}
           />
         )}
+
+        {showSignatures && <SignatureCapture onClose={() => setShowSignatures(false)} />}
 
         {toast && <div className="toast">{toast}</div>}
       </div>
