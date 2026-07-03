@@ -50,6 +50,35 @@ export async function typedSignatureToPng(
   return trimToPng(canvas) // transparent bg -> white-key is a no-op; trims to the glyphs
 }
 
+const SANS_STACK = 'Helvetica, Arial, sans-serif'
+
+// Rasterize a short text run (e.g. a date) to a transparent, trimmed PNG in a
+// plain sans-serif — so it stamps as a flattened image (not selectable text),
+// matching the exporter's Helvetica.
+export async function dateToPng(
+  text: string,
+  opts: { fontPx?: number; dpr?: number } = {}
+): Promise<{ png: Uint8Array; width: number; height: number }> {
+  const fontPx = opts.fontPx ?? 64
+  const dpr = opts.dpr ?? 2
+  const measure = document.createElement('canvas').getContext('2d')
+  if (!measure) throw new Error('canvas: no 2d context')
+  measure.font = `${fontPx}px ${SANS_STACK}`
+  const w = Math.ceil(measure.measureText(text).width) + Math.ceil(fontPx * 0.4)
+  const h = Math.ceil(fontPx * 1.4)
+  const canvas = document.createElement('canvas')
+  canvas.width = w * dpr
+  canvas.height = h * dpr
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('canvas: no 2d context')
+  ctx.scale(dpr, dpr)
+  ctx.fillStyle = '#111'
+  ctx.textBaseline = 'middle'
+  ctx.font = `${fontPx}px ${SANS_STACK}`
+  ctx.fillText(text, fontPx * 0.2, h / 2)
+  return trimToPng(canvas)
+}
+
 export async function fileToTrimmedPng(
   file: Blob
 ): Promise<{ png: Uint8Array; width: number; height: number }> {

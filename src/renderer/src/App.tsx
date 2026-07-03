@@ -8,6 +8,7 @@ import { useCollection } from './app/useCollection'
 import { useFullView } from './app/useFullView'
 import { useExport } from './app/useExport'
 import { usePlacements } from './app/usePlacements'
+import { useMarkLibrary } from './app/useMarkLibrary'
 import { useImport } from './app/useImport'
 import { usePaste } from './app/usePaste'
 import { useDragController } from './app/useDragController'
@@ -17,6 +18,8 @@ import { useSearchIndex } from './search/useSearchIndex'
 import { FindProvider } from './search/FindContext'
 import { FindBar } from './components/FindBar'
 import { SignatureCapture } from './components/signing/SignatureCapture'
+import { SignProvider, type SignApi } from './components/signing/SignContext'
+import type { Placement } from './pdfx/sign/types'
 
 const TOAST_MS = 4000
 
@@ -26,6 +29,7 @@ export default function App(): React.JSX.Element {
   const [renderVersion, setRenderVersion] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
   const [showSignatures, setShowSignatures] = useState(false)
+  const [signMode, setSignMode] = useState(false)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const canvasRef = useRef<CanvasHandle | null>(null)
 
@@ -54,7 +58,55 @@ export default function App(): React.JSX.Element {
   )
 
   const placements = usePlacements()
+  const library = useMarkLibrary()
   const { exportCollection, exportZip } = useExport(docs, placements.placements, setBusy, flash)
+
+  const addPlacement = placements.add
+  const allPlacements = placements.placements
+  const addToAllPages = useCallback(
+    (source: Placement) => {
+      const pageIds = docs.flatMap((d) => d.pages.map((p) => p.id))
+      for (const id of pageIds) {
+        if (id === source.pageId) continue
+        const exists = allPlacements.some(
+          (pl) => pl.pageId === id && pl.kind === 'initials' && pl.assetId === source.assetId
+        )
+        if (exists) continue
+        addPlacement({
+          pageId: id,
+          kind: 'initials',
+          assetId: source.assetId,
+          xFrac: source.xFrac,
+          yFrac: source.yFrac,
+          wFrac: source.wFrac,
+          hFrac: source.hFrac
+        })
+      }
+    },
+    [docs, allPlacements, addPlacement]
+  )
+
+  const signApi = useMemo<SignApi>(
+    () => ({
+      signMode,
+      setSignMode,
+      marks: library.marks,
+      forPage: placements.forPage,
+      add: placements.add,
+      update: placements.update,
+      remove: placements.remove,
+      addToAllPages
+    }),
+    [
+      signMode,
+      library.marks,
+      placements.forPage,
+      placements.add,
+      placements.update,
+      placements.remove,
+      addToAllPages
+    ]
+  )
   const { addFiles, openViaDialog, addPagesToDoc, handleExternalDropFiles } = useImport(
     collection,
     setBusy,
@@ -176,17 +228,29 @@ export default function App(): React.JSX.Element {
         />
 
         {fullView && fullViewDoc && (
-          <FullView
-            docs={docs}
-            startDocId={fullView.docId}
-            startPageId={fullView.pageId}
-            originRect={fullView.originRect}
-            onActivePageChange={fullViewState.setHiddenPageId}
-            onClose={fullViewState.closeFullView}
-          />
+          <SignProvider value={signApi}>
+            <FullView
+              docs={docs}
+              startDocId={fullView.docId}
+              startPageId={fullView.pageId}
+              originRect={fullView.originRect}
+              onActivePageChange={fullViewState.setHiddenPageId}
+              onClose={() => {
+                setSignMode(false)
+                fullViewState.closeFullView()
+              }}
+            />
+          </SignProvider>
         )}
 
-        {showSignatures && <SignatureCapture onClose={() => setShowSignatures(false)} />}
+        {showSignatures && (
+          <SignatureCapture
+            onClose={() => {
+              setShowSignatures(false)
+              void library.reload()
+            }}
+          />
+        )}
 
         {toast && <div className="toast">{toast}</div>}
       </div>

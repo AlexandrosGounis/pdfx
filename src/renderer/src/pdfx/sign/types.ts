@@ -23,8 +23,9 @@ export interface Placement {
   yFrac: number
   wFrac: number
   hFrac: number
-  assetId?: string // for signature/initials
-  text?: string // for date/initials text
+  assetId?: string // for signature/initials (library mark)
+  png?: Uint8Array // inline generated image (e.g. a rasterized date) — stamped as an image, not selectable text
+  text?: string // original text of a generated mark (kept for reference/regeneration)
   appliedToAllPages?: boolean
 }
 

@@ -1,5 +1,6 @@
 import type { PageEntry } from '../../types'
 import { PageView } from '../PageView'
+import { SignatureLayer } from '../signing/SignatureLayer'
 import { useFindState } from '../../search/FindContext'
 import type { View } from './geometry'
 import { DOUBLE_CLICK_ZOOM, fitInto, TRANSITION_MS } from './geometry'
@@ -70,6 +71,9 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
           highlightQuery={highlight ? query : undefined}
           ocrWords={highlight ? getOcrWords(`${p.source.id}:${p.pageIndex}`) : undefined}
         />
+        {isCurrent && interactive && !zoomed && (
+          <SignatureLayer pageId={p.id} width={size.w} height={size.h} />
+        )}
       </div>
     </div>
   )

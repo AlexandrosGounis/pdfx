@@ -63,6 +63,37 @@ describe('buildPdf with placements', () => {
     expect(reloaded.getPageCount()).toBe(1)
   })
 
+  it('stamps a date placement carrying an inline png (image, not selectable text)', async () => {
+    const bytes = await onePagePdfBytes()
+    const pages: ExportPage[] = [
+      {
+        bytes,
+        sourceKey: 's',
+        pageIndex: 0,
+        placements: [
+          {
+            id: 'd1',
+            pageId: 'a',
+            kind: 'date',
+            xFrac: 0.1,
+            yFrac: 0.1,
+            wFrac: 0.4,
+            hFrac: 0.05,
+            text: 'Jul 3, 2026, 14:32 UTC',
+            png: PNG_1x1
+          }
+        ]
+      }
+    ]
+
+    // No assets map and no font needed: the inline png is embedded directly.
+    const { bytes: outBytes, skipped } = await buildPdf(pages)
+    expect(skipped).toEqual([])
+
+    const reloaded = await PDFDocument.load(outBytes)
+    expect(reloaded.getPageCount()).toBe(1)
+  })
+
   it('reports a missing_asset skip when a placement references an unknown assetId', async () => {
     const bytes = await onePagePdfBytes()
     const pages: ExportPage[] = [

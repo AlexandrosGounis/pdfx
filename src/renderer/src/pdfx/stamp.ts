@@ -68,25 +68,39 @@ export async function stampPage(
       })
       continue
     }
-    // image mark (signature / initials)
-    if (!p.assetId) {
-      skipped.push({ placementId: p.id, reason: 'no_asset_id' })
-      continue
-    }
-    const asset = assets.get(p.assetId)
-    if (!asset) {
-      skipped.push({ placementId: p.id, reason: 'missing_asset' })
-      continue
-    }
-    let img = embedCache.get(p.assetId)
-    if (!img) {
-      try {
-        img = await doc.embedPng(asset.png)
-      } catch {
-        skipped.push({ placementId: p.id, reason: 'embed_failed' })
+    // image mark: an inline png (e.g. a rasterized date) or a library asset (signature / initials)
+    let img: PDFImage | undefined
+    if (p.png) {
+      img = embedCache.get(p.id)
+      if (!img) {
+        try {
+          img = await doc.embedPng(p.png)
+        } catch {
+          skipped.push({ placementId: p.id, reason: 'embed_failed' })
+          continue
+        }
+        embedCache.set(p.id, img)
+      }
+    } else {
+      if (!p.assetId) {
+        skipped.push({ placementId: p.id, reason: 'no_asset_id' })
         continue
       }
-      embedCache.set(p.assetId, img)
+      const asset = assets.get(p.assetId)
+      if (!asset) {
+        skipped.push({ placementId: p.id, reason: 'missing_asset' })
+        continue
+      }
+      img = embedCache.get(p.assetId)
+      if (!img) {
+        try {
+          img = await doc.embedPng(asset.png)
+        } catch {
+          skipped.push({ placementId: p.id, reason: 'embed_failed' })
+          continue
+        }
+        embedCache.set(p.assetId, img)
+      }
     }
     page.drawImage(img, {
       x: rect.x,
