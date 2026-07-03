@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-import { mkdir, readFile, writeFile, rename } from 'fs/promises'
-import { existsSync } from 'fs'
+import { mkdir, readFile, writeFile, rename, unlink } from 'fs/promises'
 import { join, resolve, relative, isAbsolute } from 'path'
 import { randomUUID } from 'crypto'
 
@@ -136,13 +135,10 @@ export function createMarkStore(dir: string): {
     async remove(id: string): Promise<void> {
       if (typeof id !== 'string' || !ID_RE.test(id)) throw new Error('marks: invalid id')
       const next = (await readIndex()).filter((m) => m.id !== id)
-      const src = confined(dir, `${id}.png`)
-      if (existsSync(src)) {
-        // Archive (never-delete default; PENDING user decision — Fable recommends hard-delete
-        // for sensitive signature data; flip to `unlink(src)` + update test 2 if chosen).
-        const trash = join(dir, '.trash')
-        await mkdir(trash, { recursive: true })
-        await rename(src, join(trash, `${id}.png`))
+      try {
+        await unlink(confined(dir, `${id}.png`))
+      } catch {
+        // already gone -> nothing to remove
       }
       await writeIndex(next)
     }

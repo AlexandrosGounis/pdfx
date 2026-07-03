@@ -32,13 +32,13 @@ describe('createMarkStore', () => {
     expect(Array.from(list[0].png)).toEqual(Array.from(png(10)))
   })
 
-  it('remove archives the mark (gone from list, PNG moved to .trash — not hard-deleted)', async () => {
+  it('remove hard-deletes the mark (gone from list and from disk)', async () => {
     const store = createMarkStore(dir)
     const saved = await store.save({ role: 'initials', kind: 'type', width: 50, height: 50, png: png(5) })
     await store.remove(saved.id)
     expect(await store.list()).toHaveLength(0)
     expect(existsSync(join(dir, `${saved.id}.png`))).toBe(false)
-    expect(existsSync(join(dir, '.trash', `${saved.id}.png`))).toBe(true)
+    expect(existsSync(join(dir, '.trash', `${saved.id}.png`))).toBe(false)
   })
 
   it('rejects a non-UUID id on remove (path-traversal guard) without touching the store', async () => {
