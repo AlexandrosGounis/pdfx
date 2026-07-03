@@ -65,15 +65,18 @@ export default function App(): React.JSX.Element {
   const allPlacements = placements.placements
   const addToAllPages = useCallback(
     (source: Placement) => {
-      const pageIds = docs.flatMap((d) => d.pages.map((p) => p.id))
-      for (const id of pageIds) {
-        if (id === source.pageId) continue
+      // Scope to the document being signed (the one that owns the source page),
+      // not every document in the collection.
+      const doc = docs.find((d) => d.pages.some((p) => p.id === source.pageId))
+      if (!doc) return
+      for (const page of doc.pages) {
+        if (page.id === source.pageId) continue
         const exists = allPlacements.some(
-          (pl) => pl.pageId === id && pl.kind === 'initials' && pl.assetId === source.assetId
+          (pl) => pl.pageId === page.id && pl.kind === 'initials' && pl.assetId === source.assetId
         )
         if (exists) continue
         addPlacement({
-          pageId: id,
+          pageId: page.id,
           kind: 'initials',
           assetId: source.assetId,
           xFrac: source.xFrac,

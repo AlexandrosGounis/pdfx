@@ -14,10 +14,12 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 function dateLabel(): string {
+  // UTC to match signingTimestamp() — a single, universal basis for both options.
   return new Date().toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
+    timeZone: 'UTC'
   })
 }
 
