@@ -5,7 +5,10 @@ name: CI
 # on purpose (no packaging / no native rebuild / no app launch).
 
 on:
+  # PRs cover branch updates before merge (pull_request runs on every push to the
+  # PR head); limit push builds to main so branch pushes don't double-run.
   push:
+    branches: [main]
   pull_request:
 
 concurrency:
