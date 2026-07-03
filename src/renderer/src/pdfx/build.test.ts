@@ -55,10 +55,41 @@ describe('buildPdf with placements', () => {
 
     const plainOut = await buildPdf(plain)
     const stampedOut = await buildPdf(stamped, assets)
-    expect(stampedOut.length).toBeGreaterThan(plainOut.length)
+    expect(stampedOut.bytes.length).toBeGreaterThan(plainOut.bytes.length)
+    expect(stampedOut.skipped).toEqual([])
 
     // Still a valid, loadable single-page PDF.
-    const reloaded = await PDFDocument.load(stampedOut)
+    const reloaded = await PDFDocument.load(stampedOut.bytes)
+    expect(reloaded.getPageCount()).toBe(1)
+  })
+
+  it('reports a missing_asset skip when a placement references an unknown assetId', async () => {
+    const bytes = await onePagePdfBytes()
+    const pages: ExportPage[] = [
+      {
+        bytes,
+        sourceKey: 's',
+        pageIndex: 0,
+        placements: [
+          {
+            id: 'p1',
+            pageId: 'a',
+            kind: 'signature',
+            xFrac: 0.1,
+            yFrac: 0.1,
+            wFrac: 0.3,
+            hFrac: 0.2,
+            assetId: 'missing-asset'
+          }
+        ]
+      }
+    ]
+
+    const { bytes: outBytes, skipped } = await buildPdf(pages)
+    expect(skipped).toEqual([{ placementId: 'p1', reason: 'missing_asset' }])
+
+    // Still a valid, loadable single-page PDF even though the asset was missing.
+    const reloaded = await PDFDocument.load(outBytes)
     expect(reloaded.getPageCount()).toBe(1)
   })
 })

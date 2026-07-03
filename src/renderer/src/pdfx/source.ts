@@ -1,5 +1,6 @@
 import { getDocument } from 'pdfjs-dist'
 import { partitionPages, readManifest, stripExtension } from './format'
+import type { ExportPage } from './format'
 import { findConverter } from './convert'
 import type { DocEntry, PageEntry, PdfSource } from '../types'
 
@@ -11,12 +12,6 @@ interface PageSize {
 export interface LoadedSource {
   source: PdfSource
   sizes: PageSize[]
-}
-
-export interface ExportPageRef {
-  sourceKey: string
-  bytes: Uint8Array
-  pageIndex: number
 }
 
 // A crafted PDF can advertise an enormous page count (or a shared/cyclic page tree)
@@ -62,7 +57,7 @@ export async function importIntoDocs(filename: string, bytes: Uint8Array): Promi
   }))
 }
 
-export const toExportPage = (page: PageEntry): ExportPageRef => ({
+export const toExportPage = (page: PageEntry): ExportPage => ({
   sourceKey: page.source.id,
   bytes: page.source.bytes,
   pageIndex: page.pageIndex

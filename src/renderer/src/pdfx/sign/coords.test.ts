@@ -37,4 +37,17 @@ describe('mapPlacementToUserSpace', () => {
     expect(r.x).toBe(10 + 5)
     expect(r.y).toBe(200 - 40 - 50 + 7)
   })
+
+  it('rotation 90 with a CropBox origin offset adds the crop offset after rotation', () => {
+    const r = mapPlacementToUserSpace(frac, {
+      visualWidth: 100,
+      visualHeight: 200,
+      rotation: 90,
+      cropX: 5,
+      cropY: 7
+    })
+    // rotation-90 base (no crop) is { x: 90, y: 10 }; crop offset is added last.
+    expect(r.x).toBe(90 + 5)
+    expect(r.y).toBe(10 + 7)
+  })
 })

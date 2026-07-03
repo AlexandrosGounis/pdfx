@@ -7,6 +7,7 @@ import type { CanvasHandle } from './components/Canvas'
 import { useCollection } from './app/useCollection'
 import { useFullView } from './app/useFullView'
 import { useExport } from './app/useExport'
+import { usePlacements } from './app/usePlacements'
 import { useImport } from './app/useImport'
 import { usePaste } from './app/usePaste'
 import { useDragController } from './app/useDragController'
@@ -52,7 +53,8 @@ export default function App(): React.JSX.Element {
     [find.active, find.matchedQuery, find.result, searchIndex.getOcrWords]
   )
 
-  const { exportCollection, exportZip } = useExport(docs, setBusy, flash)
+  const placements = usePlacements()
+  const { exportCollection, exportZip } = useExport(docs, placements.placements, setBusy, flash)
   const { addFiles, openViaDialog, addPagesToDoc, handleExternalDropFiles } = useImport(
     collection,
     setBusy,
