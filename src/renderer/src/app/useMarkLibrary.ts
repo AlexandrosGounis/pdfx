@@ -40,6 +40,7 @@ export function useMarkLibrary(): MarkLibrary {
     try {
       const created = (await window.api.marks.save(input)) as MarkAsset
       setMarks((prev) => [...prev, created])
+      setError(null)
       return created
     } catch (e) {
       setError(String(e))
@@ -51,6 +52,7 @@ export function useMarkLibrary(): MarkLibrary {
     try {
       await window.api.marks.remove(id)
       setMarks((prev) => prev.filter((m) => m.id !== id))
+      setError(null)
     } catch (e) {
       setError(String(e))
     }

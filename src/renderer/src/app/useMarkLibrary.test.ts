@@ -66,4 +66,36 @@ describe('useMarkLibrary', () => {
     })
     expect(result.current.marks).toHaveLength(0)
   })
+
+  it('clears a stale error after a subsequent successful save', async () => {
+    const { result } = renderHook(() => useMarkLibrary())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    ;(window as unknown as { api: { marks: { save: unknown } } }).api.marks.save = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockImplementation(async (input: Omit<MarkAsset, 'id' | 'createdAt'>) => ({
+        ...input,
+        id: 'new2',
+        createdAt: '2026-07-03'
+      }))
+
+    const markInput = {
+      role: 'signature' as const,
+      kind: 'type' as const,
+      png: new Uint8Array([137, 80, 78, 71]),
+      width: 5,
+      height: 5
+    }
+
+    await act(async () => {
+      await result.current.save(markInput)
+    })
+    expect(result.current.error).not.toBeNull()
+
+    await act(async () => {
+      await result.current.save(markInput)
+    })
+    expect(result.current.error).toBeNull()
+  })
 })
