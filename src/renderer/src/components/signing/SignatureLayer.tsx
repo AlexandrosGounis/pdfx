@@ -14,7 +14,11 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 function dateLabel(): string {
-  return new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+  return new Date().toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 
 function signingTimestamp(): string {
@@ -233,9 +237,12 @@ function PlacementBox({
   const [rect, setRect] = useState<PxRect>(seed)
   const rectRef = useRef<PxRect>(rect)
   const boxRef = useRef<HTMLDivElement | null>(null)
-  const drag = useRef<{ mode: 'move' | 'resize'; startX: number; startY: number; orig: PxRect } | null>(
-    null
-  )
+  const drag = useRef<{
+    mode: 'move' | 'resize'
+    startX: number
+    startY: number
+    orig: PxRect
+  } | null>(null)
 
   useEffect(() => {
     const next = {
@@ -472,7 +479,11 @@ export function SignatureLayer({
               type="button"
               onClick={() => pickOrAdd('signature')}
               disabled={signatures.length === 0}
-              title={signatures.length === 0 ? 'Save a signature first (Signatures button)' : 'Add signature'}
+              title={
+                signatures.length === 0
+                  ? 'Save a signature first (Signatures button)'
+                  : 'Add signature'
+              }
               style={{ ...btnBase, opacity: signatures.length === 0 ? 0.5 : 1 }}
             >
               ＋ Signature{signatures.length > 1 ? ' ▾' : ''}
@@ -489,7 +500,11 @@ export function SignatureLayer({
               type="button"
               onClick={() => pickOrAdd('initials')}
               disabled={initials.length === 0}
-              title={initials.length === 0 ? 'Save initials first (Signatures ▸ Initials)' : 'Add initials'}
+              title={
+                initials.length === 0
+                  ? 'Save initials first (Signatures ▸ Initials)'
+                  : 'Add initials'
+              }
               style={{ ...btnBase, opacity: initials.length === 0 ? 0.5 : 1 }}
             >
               ＋ Initials{initials.length > 1 ? ' ▾' : ''}

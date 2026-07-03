@@ -7,7 +7,7 @@ import { OpenedFile, IMPORTABLE, readFiles, expandDropPaths } from './file-intak
 import { clipboardFilePaths } from './clipboard'
 import { readResource } from './resource'
 import { getMainWindow, setRendererReady, sendOpenPaths } from './window'
-import { createMarkStore } from './marks'
+import { createMarkStore, type MarkInput } from './marks'
 
 const MAX_WRITE_BYTES = 1024 * 1024 * 1024 // 1 GiB cap on a single IPC write
 
@@ -121,6 +121,6 @@ export function registerIpc(getPending: () => string[], clearPending: () => void
 
   const marks = createMarkStore(join(app.getPath('userData'), 'signatures'))
   ipcMain.handle('pdfx:marks-list', () => marks.list())
-  ipcMain.handle('pdfx:marks-save', (_event, input) => marks.save(input))
+  ipcMain.handle('pdfx:marks-save', (_event, input: MarkInput) => marks.save(input))
   ipcMain.handle('pdfx:marks-remove', (_event, id: string) => marks.remove(id))
 }

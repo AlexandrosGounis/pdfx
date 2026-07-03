@@ -22,7 +22,11 @@ export async function trimToPng(
   out.height = trimmed.height
   const octx = out.getContext('2d')
   if (!octx) throw new Error('canvas: no 2d context')
-  octx.putImageData(new ImageData(new Uint8ClampedArray(trimmed.data), trimmed.width, trimmed.height), 0, 0)
+  octx.putImageData(
+    new ImageData(new Uint8ClampedArray(trimmed.data), trimmed.width, trimmed.height),
+    0,
+    0
+  )
   return { png: await canvasToPngBytes(out), width: out.width, height: out.height }
 }
 

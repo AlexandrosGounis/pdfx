@@ -1,4 +1,6 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
+// Single source of truth for the mark types lives in main (same tsconfig project).
+import type { MarkInput, StoredMark } from '../main/marks'
 
 export interface OpenedFile {
   name: string
@@ -13,27 +15,6 @@ export type MenuAction = 'open' | 'export-pdfx' | 'export-pdf' | 'export-zip'
 export interface SaveFilter {
   name: string
   extensions: string[]
-}
-
-export type MarkRole = 'signature' | 'initials'
-export type MarkKind = 'draw' | 'type' | 'image'
-export interface MarkInput {
-  role: MarkRole
-  kind: MarkKind
-  width: number
-  height: number
-  label?: string
-  png: Uint8Array
-}
-export interface StoredMark {
-  id: string
-  role: MarkRole
-  kind: MarkKind
-  width: number
-  height: number
-  label?: string
-  createdAt: string
-  png: Uint8Array
 }
 
 const api = {
