@@ -11,6 +11,22 @@ import { registerOcrProtocol, registerOcrSchemePrivileged } from './ocr-assets'
 
 app.setName('PDFx')
 
+// Opt-in escape hatch for Windows GPU-process crashes (0xC0000005) seen under the
+// dev server. Gated behind an env var so normal/production launches keep hardware
+// acceleration. Must run before app is ready.
+if (process.env.PDFX_DISABLE_GPU) {
+  app.disableHardwareAcceleration()
+}
+
+// Surface native process crashes (0xC0000005 etc.) to the terminal so we can see
+// which process died and why, instead of a bare segfault exit code.
+app.on('child-process-gone', (_e, details) => {
+  console.error('[pdfx] child-process-gone:', details.type, details.reason, details.exitCode ?? '')
+})
+app.on('render-process-gone', (_e, _wc, details) => {
+  console.error('[pdfx] render-process-gone:', details.reason, details.exitCode ?? '')
+})
+
 registerOcrSchemePrivileged()
 
 if (process.env.PDFX_USER_DATA) {

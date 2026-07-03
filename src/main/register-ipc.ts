@@ -26,8 +26,14 @@ export function registerIpc(getPending: () => string[], clearPending: () => void
       if (!mainWindow) return null
       const result = await dialog.showSaveDialog(mainWindow, {
         title: 'Export',
-        defaultPath: defaultName,
-        filters: [filter ?? { name: 'PDFX', extensions: ['pdfx'] }]
+        // Use an absolute default in a safe location. A bare relative name plus the
+        // Windows recent-items shell hook is a known native-crash trigger, so also
+        // opt out of "add to recent".
+        defaultPath: isAbsolute(defaultName)
+          ? defaultName
+          : join(app.getPath('documents'), defaultName),
+        filters: [filter ?? { name: 'PDFX', extensions: ['pdfx'] }],
+        properties: ['dontAddToRecent', 'showOverwriteConfirmation']
       })
       return result.canceled || !result.filePath ? null : result.filePath
     }
