@@ -1125,3 +1125,298 @@ body {
     transform: translate(-50%, 0);
   }
 }
+
+/* Signatures capture modal — a centered "glass" panel over a dimmed backdrop,
+   following the same dark-pinned-tokens approach as .full-view so it reads
+   consistently regardless of the system light/dark setting. */
+.sign-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay);
+  animation: sign-fade-in 0.15s ease;
+  -webkit-app-region: no-drag;
+}
+
+@keyframes sign-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.sign-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(560px, calc(100vw - 40px));
+  max-height: min(680px, calc(100vh - 40px));
+  background: var(--overlay-strong);
+  color: var(--ink);
+  border-radius: 14px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px var(--hairline);
+  overflow: hidden;
+  animation: sign-pop-in 0.18s ease;
+}
+
+@keyframes sign-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(4px);
+  }
+}
+
+.sign-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 0 20px;
+}
+
+.sign-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.sign-role-toggle {
+  display: flex;
+  gap: 6px;
+  margin: 14px 20px 0;
+}
+
+.sign-role-btn {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: var(--group-bg);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.sign-role-btn:hover {
+  color: var(--ink);
+}
+
+.sign-role-btn.active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.sign-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 14px 20px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.sign-tab {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.sign-tab:hover {
+  color: var(--ink);
+}
+
+.sign-tab.active {
+  color: var(--ink);
+  border-bottom-color: var(--select);
+}
+
+.sign-error {
+  margin: 12px 20px 0;
+  font-size: 12.5px;
+  color: #ff8a8a;
+  background: rgba(255, 90, 90, 0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.sign-tab-body {
+  flex: 1;
+  min-height: 260px;
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+
+.sign-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.sign-tab-panel-hidden {
+  display: none;
+}
+
+.sign-canvas {
+  width: 100%;
+  height: 220px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.sign-tab-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sign-type-input {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--group-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.sign-type-input:focus {
+  box-shadow: inset 0 0 0 1px var(--select);
+}
+
+.sign-type-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  font-family:
+    'Segoe Script', 'Brush Script MT', 'Snell Roundhand', 'Apple Chancery', cursive;
+  font-size: 40px;
+  color: #16161a;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  padding: 12px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.sign-upload-input {
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.sign-upload-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  overflow: hidden;
+}
+
+.sign-upload-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+}
+
+.sign-upload-empty {
+  font-size: 12.5px;
+  color: #9a9aa0;
+}
+
+.sign-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 140px;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.sign-saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.sign-thumb {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: var(--group-bg);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  overflow: hidden;
+}
+
+.sign-thumb.pickable {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.sign-thumb.pickable:hover,
+.sign-thumb.pickable:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--select);
+  outline: none;
+}
+
+.sign-thumb-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 84px;
+  background: #ffffff;
+}
+
+.sign-thumb-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.sign-thumb-fallback {
+  font-size: 11px;
+  color: #9a9aa0;
+}
+
+.sign-thumb-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.sign-thumb-role {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.sign-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--hairline);
+}
