@@ -2,7 +2,7 @@
   "name": "pdfx",
   "productName": "PDFx",
   "version": "2026.6.1-beta.0",
-  "description": "PDFX — a backwards-compatible PDF extension for multi-document files, with a minimal viewer",
+  "description": "PDFX \u2014 a backwards-compatible PDF extension for multi-document files, with a minimal viewer",
   "main": "./out/main/index.js",
   "author": "Alex Gounis",
   "license": "MIT",
@@ -40,7 +40,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "d3-selection": "3.0.0",
     "d3-zoom": "3.0.0",
-    "electron": "38.4.0",
+    "electron": "41.0.0",
     "electron-builder": "25.1.8",
     "electron-vite": "4.0.1",
     "fflate": "0.8.3",
@@ -55,5 +55,9 @@
     "tesseract.js-core": "7.0.0",
     "typescript": "5.9.3",
     "vite": "7.3.5"
+  },
+  "resolutions": {
+    "tar": "^7.5.11",
+    "form-data": "^4.0.6"
   }
 }
