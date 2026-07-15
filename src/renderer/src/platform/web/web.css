@@ -1,0 +1,11 @@
+html.web,
+html.web body {
+  background: #f7f7f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.web,
+  html.web body {
+    background: #1c1c1e;
+  }
+}

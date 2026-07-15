@@ -33,10 +33,14 @@ const scope = self as unknown as {
 
 const POOL = Math.max(1, Math.min(2, Math.floor((navigator.hardwareConcurrency || 4) / 2)))
 
+const ASSET_BASE = import.meta.env.VITE_PDFX_WEB
+  ? new URL('/ocr', self.location.href).href
+  : 'pdfx-ocr://assets'
+
 const OFFLINE_OPTIONS = {
-  workerPath: 'pdfx-ocr://assets/worker.min.js',
-  corePath: 'pdfx-ocr://assets/core',
-  langPath: 'pdfx-ocr://assets/lang',
+  workerPath: `${ASSET_BASE}/worker.min.js`,
+  corePath: `${ASSET_BASE}/core`,
+  langPath: `${ASSET_BASE}/lang`,
   gzip: true,
   logger: () => {},
   errorHandler: (error: unknown) => console.error('[ocr worker]', error)
