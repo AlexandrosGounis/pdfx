@@ -1,3 +1,4 @@
+import './platform/web/install'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { GlobalWorkerOptions } from 'pdfjs-dist'
