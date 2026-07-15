@@ -17,7 +17,14 @@ export default defineConfig({
   worker: {
     format: 'es'
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'web-csp',
+      transformIndexHtml: (html) =>
+        html.replace("connect-src 'self'", "connect-src 'self' https://api.github.com")
+    }
+  ],
   build: {
     outDir: resolve(__dirname, 'out/web'),
     emptyOutDir: true

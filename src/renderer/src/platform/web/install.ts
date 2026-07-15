@@ -1,7 +1,9 @@
 import { createWebApi } from './api'
 import './web.css'
 
-if (!window.api) {
+export const isWeb = !window.api
+
+if (isWeb) {
   document.documentElement.classList.add('web')
   window.api = createWebApi()
 }

@@ -2,7 +2,7 @@ import { ADD_PAGE_WIDTH, BASE_PAGE_HEIGHT } from '../canvas/layout'
 import { DashedBorder } from './dashed-border'
 import { PlusIcon } from './icons'
 
-const ROW_PAD_Y = 52 + 14
+const ROW_PAD_Y = 52 + 20
 
 export interface GhostSize {
   width: number
@@ -39,7 +39,7 @@ export function AddPageGhost({ width, height, onClick }: AddPageGhostProps): Rea
         onClick()
       }}
     >
-      <DashedBorder width={width} height={height} radius={9} dash="5 7" />
+      <DashedBorder width={width} height={height} radius={9} />
       <PlusIcon size={24} />
       <span className="add-label">Add page</span>
     </button>
@@ -69,7 +69,6 @@ export function AddDocGhost({ width, onClick }: AddDocGhostProps): React.JSX.Ele
         className="add-ghost add-doc-page"
         style={{ width: ADD_PAGE_WIDTH, height: BASE_PAGE_HEIGHT }}
       >
-        <DashedBorder width={ADD_PAGE_WIDTH} height={BASE_PAGE_HEIGHT} radius={9} dash="5 7" />
         <PlusIcon size={24} />
         <span className="add-label">Add document</span>
       </span>
