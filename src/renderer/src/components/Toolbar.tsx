@@ -1,3 +1,7 @@
+import { isWeb } from '../platform/web/install'
+import { useGitHubStars } from '../app/useGitHubStars'
+import { GitHubIcon } from './icons'
+
 interface ToolbarProps {
   documentCount: number
   pageCount: number
@@ -25,8 +29,12 @@ export function Toolbar({
   onExportPdf,
   onExportZip
 }: ToolbarProps): React.JSX.Element {
+  const stars = useGitHubStars(isWeb ? 'AlexandrosGounis/pdfx' : null)
   return (
     <header className={`toolbar${isMac ? ' mac' : ''}`}>
+      <button className="btn glass" onClick={onOpen} disabled={busy}>
+        Open
+      </button>
       {documentCount > 0 && (
         <div className="toolbar-meta">
           {documentCount} {documentCount === 1 ? 'document' : 'documents'}
@@ -69,15 +77,25 @@ export function Toolbar({
           </button>
         </div>
       )}
-      <button className="btn glass" onClick={onOpen} disabled={busy}>
-        Open
-      </button>
       <button className="btn glass" onClick={onExportPdf} disabled={busy || documentCount === 0}>
         Export PDF
       </button>
       <button className="btn glass" onClick={onExportZip} disabled={busy || documentCount === 0}>
         Export ZIP
       </button>
+      {isWeb && (
+        <a
+          className="btn glass"
+          href="https://github.com/AlexandrosGounis/pdfx"
+          target="_blank"
+          rel="noreferrer"
+          title="Star pdfx on GitHub"
+        >
+          <GitHubIcon size={14} />
+          Star
+          {stars && <span className="star-count">{stars}</span>}
+        </a>
+      )}
     </header>
   )
 }

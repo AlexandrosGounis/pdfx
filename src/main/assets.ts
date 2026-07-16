@@ -2,9 +2,10 @@ import { app, protocol } from 'electron'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const SCHEME = 'pdfx-ocr'
+const SCHEME = 'pdfx-assets'
+const DIRS = new Set(['ocr', 'pdf'])
 
-export function registerOcrSchemePrivileged(): void {
+export function registerAssetSchemePrivileged(): void {
   protocol.registerSchemesAsPrivileged([
     {
       scheme: SCHEME,
@@ -19,10 +20,8 @@ export function registerOcrSchemePrivileged(): void {
   ])
 }
 
-function ocrRoot(): string {
-  return app.isPackaged
-    ? join(process.resourcesPath, 'ocr')
-    : join(app.getAppPath(), 'resources', 'ocr')
+function assetsRoot(): string {
+  return app.isPackaged ? process.resourcesPath : join(app.getAppPath(), 'resources')
 }
 
 function contentType(path: string): string {
@@ -31,15 +30,16 @@ function contentType(path: string): string {
   return 'application/octet-stream'
 }
 
-export function registerOcrProtocol(): void {
-  const root = ocrRoot()
+export function registerAssetProtocol(): void {
+  const root = assetsRoot()
   protocol.handle(SCHEME, async (request) => {
-    const rel = decodeURIComponent(new URL(request.url).pathname).replace(/^\/+/, '')
-    if (rel.length === 0 || rel.includes('..')) {
+    const url = new URL(request.url)
+    const rel = decodeURIComponent(url.pathname).replace(/^\/+/, '')
+    if (!DIRS.has(url.hostname) || rel.length === 0 || rel.includes('..')) {
       return new Response('Forbidden', { status: 403 })
     }
     try {
-      const data = await readFile(join(root, rel))
+      const data = await readFile(join(root, url.hostname, rel))
       return new Response(new Uint8Array(data), {
         headers: { 'content-type': contentType(rel) }
       })

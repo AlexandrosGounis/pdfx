@@ -5,8 +5,8 @@ export const PAGE_GAP = 18
 export const CARD_PAD_X = 16 + 6
 const CARD_PAD_TOP = 10
 const HEADER_BLOCK = 32
-const CARD_PAD_BOTTOM = 14
-export const DOC_GAP_Y = 30
+const CARD_PAD_BOTTOM = 20
+export const DOC_GAP_Y = 34
 
 const MIN_PAGES = 5
 const REF_PAGE_WIDTH = Math.round((BASE_PAGE_HEIGHT * 612) / 792)

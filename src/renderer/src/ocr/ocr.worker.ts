@@ -35,7 +35,7 @@ const POOL = Math.max(1, Math.min(2, Math.floor((navigator.hardwareConcurrency |
 
 const ASSET_BASE = import.meta.env.VITE_PDFX_WEB
   ? new URL('/ocr', self.location.href).href
-  : 'pdfx-ocr://assets'
+  : 'pdfx-assets://ocr'
 
 const OFFLINE_OPTIONS = {
   workerPath: `${ASSET_BASE}/worker.min.js`,

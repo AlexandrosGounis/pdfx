@@ -1,3 +1,5 @@
+import { DashedBorder } from './dashed-border'
+
 interface EmptyStateProps {
   busy: boolean
   dragging?: boolean
@@ -8,6 +10,7 @@ export function EmptyState({ busy, dragging, onOpen }: EmptyStateProps): React.J
   return (
     <div className="empty-state">
       <div className={'empty-card' + (dragging ? ' drag-active' : '')}>
+        <DashedBorder radius={20} />
         <div className="empty-glyph" aria-hidden="true">
           <svg
             width="40"

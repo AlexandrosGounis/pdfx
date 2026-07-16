@@ -18,7 +18,7 @@
     "build:web": "yarn typecheck:web && vite build --config vite.config.web.ts",
     "preview:web": "vite preview --config vite.config.web.ts",
     "build": "yarn typecheck && electron-vite build",
-    "postinstall": "electron-builder install-app-deps && yarn build:native && node scripts/copy-ocr-assets.mjs",
+    "postinstall": "electron-builder install-app-deps && yarn build:native && node scripts/copy-ocr-assets.mjs && node scripts/copy-pdf-assets.mjs",
     "build:unpack": "yarn build && electron-builder --dir",
     "build:win": "yarn build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",

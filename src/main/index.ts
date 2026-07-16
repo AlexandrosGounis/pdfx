@@ -7,11 +7,11 @@ import { collectFileArgs } from './file-intake'
 import { createWindow, getMainWindow, getRendererReady, sendOpenPaths } from './window'
 import { buildMenu } from './menu'
 import { registerIpc } from './register-ipc'
-import { registerOcrProtocol, registerOcrSchemePrivileged } from './ocr-assets'
+import { registerAssetProtocol, registerAssetSchemePrivileged } from './assets'
 
 app.setName('PDFx')
 
-registerOcrSchemePrivileged()
+registerAssetSchemePrivileged()
 
 if (process.env.PDFX_USER_DATA) {
   app.setPath('userData', process.env.PDFX_USER_DATA)
@@ -44,7 +44,7 @@ if (!gotLock) {
   app.whenReady().then(() => {
     electronApp.setAppUserModelId('com.pdfx.app')
 
-    registerOcrProtocol()
+    registerAssetProtocol()
 
     nativeTheme.themeSource = 'dark'
 

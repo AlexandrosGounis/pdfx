@@ -11,7 +11,6 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,yarn.lock}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!scripts/**'
-  # Ship only the compiled native addon, not its sources or build tree.
   - '!native/**'
   - 'native/build/Release/*.node'
   - '!resources/**'
@@ -20,6 +19,8 @@ asarUnpack:
 extraResources:
   - from: resources/ocr
     to: ocr
+  - from: resources/pdf
+    to: pdf
 fileAssociations:
   - ext: pdfx
     name: PDFX Collection

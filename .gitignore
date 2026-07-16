@@ -21,3 +21,4 @@ native/build/
 *.mobileprovision
 
 resources/ocr
+resources/pdf
