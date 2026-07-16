@@ -19,12 +19,14 @@ export interface ExportPageRef {
   pageIndex: number
 }
 
-// A crafted PDF can advertise an enormous page count (or a shared/cyclic page tree)
-// to exhaust renderer memory; refuse to materialize an absurd number of pages.
 const MAX_PAGES = 10_000
 
+const WASM_URL = import.meta.env.VITE_PDFX_WEB
+  ? new URL('/pdf/', location.href).href
+  : 'pdfx-assets://pdf/'
+
 export async function loadSource(bytes: Uint8Array): Promise<LoadedSource> {
-  const pdf = await getDocument({ data: bytes.slice() }).promise
+  const pdf = await getDocument({ data: bytes.slice(), wasmUrl: WASM_URL }).promise
   if (pdf.numPages > MAX_PAGES) {
     throw new Error(`PDF declares ${pdf.numPages} pages; refusing to load more than ${MAX_PAGES}`)
   }
