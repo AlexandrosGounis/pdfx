@@ -3,6 +3,9 @@ import { PageView } from '../PageView'
 import { useFindState } from '../../search/FindContext'
 import type { View } from './geometry'
 import { DOUBLE_CLICK_ZOOM, fitInto, TRANSITION_MS } from './geometry'
+import type { EditTool, Mark, MarkRect } from '../../edit/types'
+import { MarkLayer } from '../MarkLayer'
+import { SelectableTextLayer } from './edit/SelectableTextLayer'
 
 interface FullViewPageProps {
   page: PageEntry
@@ -15,6 +18,9 @@ interface FullViewPageProps {
   flip: string | null
   flipTransition: boolean
   renderVersion: number
+  marks: Mark[] | undefined
+  selectTool: EditTool | null
+  onMark: (rects: MarkRect[]) => void
   resetView: () => void
   applyZoom: (nextZoom: (z: number) => number, focal?: { x: number; y: number }) => void
 }
@@ -22,6 +28,7 @@ interface FullViewPageProps {
 export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
   const { page: p, viewport, isCurrent, view, zoomed, interactive, animating } = props
   const { flip, flipTransition, renderVersion, resetView, applyZoom } = props
+  const { marks, selectTool, onMark } = props
 
   const { active, query, matchingPageIds, getOcrWords } = useFindState()
   const highlight = active && isCurrent && matchingPageIds.has(p.id)
@@ -70,6 +77,16 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
           highlightQuery={highlight ? query : undefined}
           ocrWords={highlight ? getOcrWords(`${p.source.id}:${p.pageIndex}`) : undefined}
         />
+        {marks && marks.length > 0 && <MarkLayer marks={marks} />}
+        {isCurrent && selectTool && (
+          <SelectableTextLayer
+            pdf={p.source.pdf}
+            pageNumber={p.pageIndex + 1}
+            naturalHeight={p.height}
+            tool={selectTool}
+            onSelect={onMark}
+          />
+        )}
       </div>
     </div>
   )

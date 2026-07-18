@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import type { DocEntry } from '../types'
+import type { MarkMap } from '../edit/types'
 import { ADD_PAGE_WIDTH } from '../canvas/layout'
 import { AddPageGhost, GhostPage } from './DropGhost'
 import { PageCell } from './page-cell'
@@ -13,6 +14,7 @@ interface DocumentRowProps {
   pagesDraggable: boolean
   collapseId: string | null
   hiddenPageId: string | null
+  marks: MarkMap
   intoGhost: { index: number; width: number; height: number } | null
   onSelectPage: (docId: string, pageId: string) => void
   onOpenPage: (docId: string, pageId: string) => void
@@ -29,6 +31,7 @@ function DocumentRowImpl({
   pagesDraggable,
   collapseId,
   hiddenPageId,
+  marks,
   intoGhost,
   onSelectPage,
   onOpenPage,
@@ -65,6 +68,7 @@ function DocumentRowImpl({
         dimmed={active && !docDimmed && !matchingPageIds.has(page.id)}
         highlightQuery={matches ? query : undefined}
         ocrWords={matches ? getOcrWords(`${page.source.id}:${page.pageIndex}`) : undefined}
+        marks={marks[page.id]}
         pagesDraggable={pagesDraggable}
         visibleNumber={visible + 1}
         onSelectPage={onSelectPage}

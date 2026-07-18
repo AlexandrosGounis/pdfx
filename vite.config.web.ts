@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { defineConfig, loadEnv, type HtmlTagDescriptor } from 'vite'
 import react from '@vitejs/plugin-react'
+import type { AtRule } from 'postcss'
 
 const siteTags = (siteUrl: string): HtmlTagDescriptor[] => [
   { tag: 'meta', attrs: { property: 'og:url', content: `${siteUrl}/` }, injectTo: 'head' },
@@ -30,6 +31,22 @@ export default defineConfig(({ mode }) => {
     },
     worker: {
       format: 'es' as const
+    },
+    css: {
+      postcss: {
+        plugins: [
+          {
+            postcssPlugin: 'enforce-dark-scheme',
+            AtRule: {
+              media(rule: AtRule) {
+                if (rule.params.includes('prefers-color-scheme: light')) rule.remove()
+                else if (rule.params.includes('prefers-color-scheme: dark'))
+                  rule.replaceWith(...(rule.nodes ?? []))
+              }
+            }
+          }
+        ]
+      }
     },
     plugins: [
       react(),

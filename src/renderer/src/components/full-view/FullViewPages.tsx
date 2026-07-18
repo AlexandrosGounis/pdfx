@@ -1,5 +1,6 @@
 import type { DocEntry } from '../../types'
 import type { View } from './geometry'
+import type { EditTool, MarkMap, MarkRect } from '../../edit/types'
 import { FullViewPage } from './FullViewPage'
 import { useFullViewDrag } from './use-full-view-drag'
 
@@ -21,6 +22,9 @@ interface FullViewPagesProps {
   flip: string | null
   flipTransition: boolean
   renderVersion: number
+  marks: MarkMap
+  selectTool: EditTool | null
+  onMark: (pageId: string, rects: MarkRect[]) => void
   setView: React.Dispatch<React.SetStateAction<View>>
   resetView: () => void
   applyZoom: (nextZoom: (z: number) => number, focal?: { x: number; y: number }) => void
@@ -30,7 +34,8 @@ interface FullViewPagesProps {
 export function FullViewPages(props: FullViewPagesProps): React.JSX.Element {
   const { scrollRef, drag, draggedRef, docs, viewport, di, pi } = props
   const { view, fit, vw, vh, zoomed, interactive, animating, flip, flipTransition } = props
-  const { renderVersion, setView, resetView, applyZoom, runClose } = props
+  const { renderVersion, marks, selectTool, onMark } = props
+  const { setView, resetView, applyZoom, runClose } = props
 
   const { onPointerDown, onPointerMove, endDrag } = useFullViewDrag({
     drag,
@@ -75,6 +80,9 @@ export function FullViewPages(props: FullViewPagesProps): React.JSX.Element {
               flip={flip}
               flipTransition={flipTransition}
               renderVersion={renderVersion}
+              marks={marks[p.id]}
+              selectTool={selectTool}
+              onMark={(rects) => onMark(p.id, rects)}
               resetView={resetView}
               applyZoom={applyZoom}
             />

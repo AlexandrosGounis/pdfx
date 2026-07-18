@@ -3,11 +3,16 @@ import * as docOps from './doc-ops/docs'
 import * as pageOps from './doc-ops/pages'
 import * as moveOps from './doc-ops/move'
 import { useClipboard } from './useClipboard'
+import { ACTIONS } from './undo'
+import type { PagePlacement, UndoEntry } from './undo'
 import type { SelectedTarget } from './selection'
 import type { PageRef } from './types'
 import type { DocEntry, PageEntry } from '../types'
 
-export function useCollection(flash: (message: string) => void) {
+export function useCollection(
+  flash: (message: string) => void,
+  pushUndo: (entry: UndoEntry) => void
+) {
   const [docs, setDocs] = useState<DocEntry[]>([])
   const [selected, setSelected] = useState<PageRef | null>(null)
   const docsRef = useRef(docs)
@@ -73,15 +78,48 @@ export function useCollection(flash: (message: string) => void) {
     setSelected({ docId, pageId: entries[entries.length - 1].id })
   }, [])
 
-  const movePageInto = useCallback((source: PageRef, targetDocId: string, index: number) => {
-    setDocs((prev) => moveOps.movePageInto(prev, source, targetDocId, index))
-    setSelected({ docId: targetDocId, pageId: source.pageId })
-  }, [])
+  const recordPageMove = useCallback(
+    (prev: DocEntry[], next: DocEntry[], pageId: string) => {
+      const from = moveOps.pagePlacement(prev, pageId)
+      const to = moveOps.pagePlacement(next, pageId)
+      if (!from || !to) return
+      pushUndo({ action: ACTIONS.MOVE_PAGE, value: pageId, payload: { pageId, from, to } })
+    },
+    [pushUndo]
+  )
 
-  const movePageToNewDoc = useCallback((source: PageRef, docIndex: number) => {
-    const newDocId = crypto.randomUUID()
-    setDocs((prev) => moveOps.movePageToNewDoc(prev, source, docIndex, newDocId))
-    setSelected({ docId: newDocId, pageId: source.pageId })
+  const movePageInto = useCallback(
+    (source: PageRef, targetDocId: string, index: number) => {
+      const prev = docsRef.current
+      const next = moveOps.movePageInto(prev, source, targetDocId, index)
+      if (next !== prev) {
+        recordPageMove(prev, next, source.pageId)
+        setDocs(next)
+      }
+      setSelected({ docId: targetDocId, pageId: source.pageId })
+    },
+    [recordPageMove]
+  )
+
+  const movePageToNewDoc = useCallback(
+    (source: PageRef, docIndex: number) => {
+      const prev = docsRef.current
+      const newDocId = crypto.randomUUID()
+      const next = moveOps.movePageToNewDoc(prev, source, docIndex, newDocId)
+      if (next === prev) return
+      recordPageMove(prev, next, source.pageId)
+      setDocs(next)
+      setSelected({ docId: newDocId, pageId: source.pageId })
+    },
+    [recordPageMove]
+  )
+
+  const placePageAt = useCallback((pageId: string, at: PagePlacement) => {
+    const prev = docsRef.current
+    const next = moveOps.placePage(prev, pageId, at)
+    if (next === prev) return
+    setDocs(next)
+    setSelected({ docId: at.docId, pageId })
   }, [])
 
   const spliceDocsAfter = useCallback((anchorDocId: string | null, newDocs: DocEntry[]) => {
@@ -110,6 +148,7 @@ export function useCollection(flash: (message: string) => void) {
     insertPagesIntoDoc,
     movePageInto,
     movePageToNewDoc,
+    placePageAt,
     spliceDocsAfter
   }
 }

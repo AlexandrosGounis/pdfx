@@ -2,6 +2,8 @@ import { getDocument } from 'pdfjs-dist'
 import { partitionPages, readManifest, stripExtension } from './format'
 import { findConverter } from './convert'
 import type { DocEntry, PageEntry, PdfSource } from '../types'
+import type { Mark } from '../edit/types'
+import type { SourceExportPage } from './format'
 
 interface PageSize {
   width: number
@@ -11,12 +13,6 @@ interface PageSize {
 export interface LoadedSource {
   source: PdfSource
   sizes: PageSize[]
-}
-
-export interface ExportPageRef {
-  sourceKey: string
-  bytes: Uint8Array
-  pageIndex: number
 }
 
 const MAX_PAGES = 10_000
@@ -64,10 +60,12 @@ export async function importIntoDocs(filename: string, bytes: Uint8Array): Promi
   }))
 }
 
-export const toExportPage = (page: PageEntry): ExportPageRef => ({
+export const toExportPage = (page: PageEntry, marks?: Mark[]): SourceExportPage => ({
+  kind: 'source',
   sourceKey: page.source.id,
   bytes: page.source.bytes,
-  pageIndex: page.pageIndex
+  pageIndex: page.pageIndex,
+  marks
 })
 
 export async function loadIncomingPages(
