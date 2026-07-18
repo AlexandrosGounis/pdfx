@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import type { DocEntry } from '../types'
 import type { MarkKind, MarkMap, MarkRect } from '../edit/types'
+import type { FieldValue, FormValuesBySource } from '../forms/types'
 import type { Rect } from './full-view/geometry'
 import { useFullViewState } from './full-view/use-full-view-state'
 import { useFullViewControls } from './full-view/use-full-view-controls'
@@ -19,6 +21,8 @@ interface FullViewProps {
   marks: MarkMap
   onToggleMark: (pageId: string, kind: MarkKind, rects: MarkRect[]) => void
   onRestoreMarks: (map: MarkMap) => void
+  formValues: FormValuesBySource
+  onFieldChange: (sourceId: string, fieldName: string, value: FieldValue) => void
   onActivePageChange: (pageId: string) => void
   onClose: () => void
 }
@@ -31,11 +35,24 @@ export function FullView({
   marks,
   onToggleMark,
   onRestoreMarks,
+  formValues,
+  onFieldChange,
   onActivePageChange,
   onClose
 }: FullViewProps): React.JSX.Element {
   const s = useFullViewState(docs, startDocId, startPageId, originRect)
   const edit = useEditMode(marks, onRestoreMarks)
+
+  useEffect(() => {
+    if (!edit.editing || !edit.tool) return
+    const active = document.activeElement
+    if (
+      active instanceof HTMLElement &&
+      (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')
+    ) {
+      active.blur()
+    }
+  }, [edit.editing, edit.tool])
 
   const controls = useFullViewControls({
     scrollRef: s.scrollRef,
@@ -119,6 +136,8 @@ export function FullView({
         onMark={(pageId, rects) => {
           if (edit.tool) onToggleMark(pageId, edit.tool, rects)
         }}
+        formValues={formValues}
+        onFieldChange={onFieldChange}
         setView={s.setView}
         resetView={controls.resetView}
         applyZoom={controls.applyZoom}

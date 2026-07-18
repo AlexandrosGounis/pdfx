@@ -1201,6 +1201,92 @@ a.btn {
   border-radius: 1px;
 }
 
+.form-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.form-field {
+  position: absolute;
+  display: block;
+  margin: 0;
+  padding: 0 2px;
+  border: none;
+  border-radius: 1px;
+  box-sizing: border-box;
+  font-family: Helvetica, Arial, sans-serif;
+  line-height: 1.15;
+  color: #16161a;
+  background: rgba(77, 132, 255, 0.16);
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  pointer-events: auto;
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.form-field.filled {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.form-field.text:focus {
+  background: #ffffff;
+  outline: 2px solid rgba(77, 132, 255, 0.55);
+}
+
+.form-field.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.form-field.checkbox.checked {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.form-layer.readonly .form-field {
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  white-space: pre;
+}
+
+.form-layer.selectable {
+  z-index: 4;
+}
+
+.form-layer.selectable .form-field {
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  white-space: pre;
+  background: rgba(77, 132, 255, 0.1);
+}
+
+.form-layer.selectable .form-field.filled {
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  background: rgba(77, 132, 255, 0.08);
+}
+
+.form-layer.selectable.highlight ::selection {
+  background: rgba(255, 214, 10, 0.45);
+}
+
+.form-layer.selectable.redact ::selection {
+  background: rgba(16, 16, 18, 0.8);
+}
+
 .edit-select-layer {
   pointer-events: auto;
   mix-blend-mode: normal;

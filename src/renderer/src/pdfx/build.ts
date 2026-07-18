@@ -2,6 +2,7 @@ import { PDFDocument } from 'pdf-lib'
 
 import { MANIFEST_NAME, PDFX_VERSION } from './format'
 import { drawMarks } from './marks'
+import { registerAcroForm } from './form-fields'
 import type { ExportDocument, ExportPage, PdfxManifest, RasterExportPage } from './format'
 
 async function addRasterPage(output: PDFDocument, page: RasterExportPage): Promise<void> {
@@ -35,6 +36,7 @@ export async function buildPdf(pages: ExportPage[]): Promise<Uint8Array> {
   for (const page of pages) {
     await addExportPage(output, sources, page)
   }
+  await registerAcroForm(output)
   output.setProducer(`PDFX ${PDFX_VERSION}`)
   return output.save()
 }
@@ -51,6 +53,8 @@ export async function buildPdfx(documents: ExportDocument[], title: string): Pro
     }
     manifest.documents.push({ name: doc.name, pages: doc.pages.length })
   }
+
+  await registerAcroForm(output)
 
   await output.attach(new TextEncoder().encode(JSON.stringify(manifest, null, 2)), MANIFEST_NAME, {
     mimeType: 'application/json',

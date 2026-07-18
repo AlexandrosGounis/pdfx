@@ -10,6 +10,7 @@ import type { CanvasLayout, DropTarget } from '../canvas/layout'
 import type { PageRef } from '../app/types'
 import type { DocEntry } from '../types'
 import type { MarkMap } from '../edit/types'
+import type { FormValuesBySource } from '../forms/types'
 
 interface CollectionCanvasProps {
   docs: DocEntry[]
@@ -20,6 +21,7 @@ interface CollectionCanvasProps {
   selected: PageRef | null
   hiddenPageId: string | null
   marks: MarkMap
+  formValues: FormValuesBySource
   dragKind: 'internal' | 'external' | null
   draggingPage: PageRef | null
   dropTarget: DropTarget | null
@@ -93,6 +95,7 @@ export function CollectionCanvas(props: CollectionCanvasProps): React.JSX.Elemen
         draggingPage={draggingPage}
         hiddenPageId={props.hiddenPageId}
         marks={props.marks}
+        formValues={props.formValues}
         intoDocId={intoDocId}
         intoIndex={intoIndex}
         intoGhostWidth={ghostSize.width}

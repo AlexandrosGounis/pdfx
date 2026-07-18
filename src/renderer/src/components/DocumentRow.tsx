@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import type { DocEntry } from '../types'
 import type { MarkMap } from '../edit/types'
+import type { FormValuesBySource } from '../forms/types'
 import { ADD_PAGE_WIDTH } from '../canvas/layout'
 import { AddPageGhost, GhostPage } from './DropGhost'
 import { PageCell } from './page-cell'
@@ -15,6 +16,7 @@ interface DocumentRowProps {
   collapseId: string | null
   hiddenPageId: string | null
   marks: MarkMap
+  formValues: FormValuesBySource
   intoGhost: { index: number; width: number; height: number } | null
   onSelectPage: (docId: string, pageId: string) => void
   onOpenPage: (docId: string, pageId: string) => void
@@ -32,6 +34,7 @@ function DocumentRowImpl({
   collapseId,
   hiddenPageId,
   marks,
+  formValues,
   intoGhost,
   onSelectPage,
   onOpenPage,
@@ -69,6 +72,7 @@ function DocumentRowImpl({
         highlightQuery={matches ? query : undefined}
         ocrWords={matches ? getOcrWords(`${page.source.id}:${page.pageIndex}`) : undefined}
         marks={marks[page.id]}
+        formValues={formValues[page.source.id]}
         pagesDraggable={pagesDraggable}
         visibleNumber={visible + 1}
         onSelectPage={onSelectPage}

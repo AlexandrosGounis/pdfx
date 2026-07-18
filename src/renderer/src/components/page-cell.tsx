@@ -2,9 +2,12 @@ import { memo } from 'react'
 import type { PageEntry } from '../types'
 import type { OcrWord } from '../ocr/types'
 import type { Mark } from '../edit/types'
+import { hasAnyValue } from '../forms/types'
+import type { FormValues } from '../forms/types'
 import { pageDisplayWidth } from '../canvas/layout'
 import { PageView } from './PageView'
 import { MarkLayer } from './MarkLayer'
+import { FormLayer } from './forms/FormLayer'
 import { buildPageDragImage } from './page-drag-image'
 
 interface PageCellProps {
@@ -19,6 +22,7 @@ interface PageCellProps {
   highlightQuery: string | undefined
   ocrWords: OcrWord[] | undefined
   marks: Mark[] | undefined
+  formValues: FormValues | undefined
   pagesDraggable: boolean
   visibleNumber: number
   onSelectPage: (docId: string, pageId: string) => void
@@ -39,6 +43,7 @@ function PageCellImpl({
   highlightQuery,
   ocrWords,
   marks,
+  formValues,
   pagesDraggable,
   visibleNumber,
   onSelectPage,
@@ -100,6 +105,15 @@ function PageCellImpl({
         highlightQuery={highlightQuery}
         ocrWords={ocrWords}
       />
+      {hasAnyValue(formValues) && (
+        <FormLayer
+          pdf={page.source.pdf}
+          pageNumber={page.pageIndex + 1}
+          naturalHeight={page.height}
+          values={formValues!}
+          readOnly
+        />
+      )}
       {marks && marks.length > 0 && <MarkLayer marks={marks} />}
       <span className="page-number">{visibleNumber}</span>
     </div>

@@ -7,12 +7,13 @@ import type { ExportPage } from './format'
 
 export async function prepareExportPage(
   page: PageEntry,
-  marks: Mark[] | undefined
+  marks: Mark[] | undefined,
+  filledBytes?: Uint8Array
 ): Promise<ExportPage> {
   if (marks?.some((m) => m.kind === 'redact')) {
-    const surgical = await buildRedactedSourcePage(page, marks)
+    const surgical = await buildRedactedSourcePage(page, marks, filledBytes)
     if (surgical) return surgical
-    return rasterizeMarkedPage(page, marks)
+    return rasterizeMarkedPage(page, marks, filledBytes)
   }
-  return toExportPage(page, marks)
+  return toExportPage(page, marks, filledBytes)
 }

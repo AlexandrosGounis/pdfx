@@ -6,6 +6,8 @@
 
 <br>
 
+Web Demo: [https://pdfx.zip](https://pdfx.zip)
+
 <a href="https://pub-2f99e567a5f04aefb5e8cb75acb90ef7.r2.dev/PDFx.zip">
   <img src="https://img.shields.io/badge/Download-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download" height="44">
 </a>
@@ -31,9 +33,9 @@
 
 PDFx is an open, backwards compatible extension of PDF that bundles many documents into a single file, plus a minimal desktop viewer for macOS, Windows, and Linux.
 
-A `.pdfx` file is a fully valid PDF: open it anywhere and every page shows in sequence. Open it in PDFx and it splits back into the original documents. Plain single PDFs work as they are.
+The files produced are fully valid PDFs: open them anywhere and every page shows in sequence. Open them in PDFx and it splits back into the original documents. Plain single PDFs work as they are.
 
-Drag and drop `.pdf` or `.pdfx` files anywhere in the window. Each document renders as a horizontal strip of pages, and documents stack vertically. Reorder or remove them, then **Export PDF** to save the whole collection as one file.
+Drag and drop `.pdf` files, images or folders anywhere in the window. Each document renders as a horizontal strip of pages, and documents stack vertically. Reorder or remove them, then **Export PDF** to save the whole collection as one file.
 
 See [SPEC.md](SPEC.md) for the format. It is short: the entire trick is one embedded JSON manifest.
 
@@ -44,9 +46,8 @@ Built with Electron, Vite, TypeScript, and React. PDF rendering by [pdf.js](http
 ```bash
 yarn              # install
 yarn dev          # run in development
-yarn build:mac    # package for macOS
-yarn build:win    # package for Windows
-yarn build:linux  # package for Linux
+yarn dev:web      # run on the web
+yarn build:mac    # build:win for windows, build:linux for linux
 ```
 
 *Linux packaging notes (formats, Flatpak, prerequisites) live in [docs/LINUX_SETUP.md](docs/LINUX_SETUP.md).*

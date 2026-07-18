@@ -22,10 +22,11 @@ const fail = (reason: string): never => {
 
 export async function buildRedactedSourcePage(
   entry: PageEntry,
-  marks: Mark[]
+  marks: Mark[],
+  filledBytes?: Uint8Array
 ): Promise<SourceExportPage | null> {
   try {
-    return await attempt(entry, marks)
+    return await attempt(entry, marks, filledBytes)
   } catch (error) {
     const reason = error instanceof Unsupported ? error.message : String(error)
     console.warn(`[pdfx] surgical redaction fell back to raster: ${reason}`)
@@ -33,8 +34,14 @@ export async function buildRedactedSourcePage(
   }
 }
 
-async function attempt(entry: PageEntry, marks: Mark[]): Promise<SourceExportPage | null> {
-  const source = await PDFDocument.load(entry.source.bytes, { ignoreEncryption: true })
+async function attempt(
+  entry: PageEntry,
+  marks: Mark[],
+  filledBytes?: Uint8Array
+): Promise<SourceExportPage | null> {
+  const source = await PDFDocument.load(filledBytes ?? entry.source.bytes, {
+    ignoreEncryption: true
+  })
   const temp = await PDFDocument.create()
   const [page] = await temp.copyPages(source, [entry.pageIndex])
   temp.addPage(page)
