@@ -1,8 +1,12 @@
+import { useRef } from 'react'
 import type { DocEntry } from '../../types'
 import type { View } from './geometry'
 import type { EditTool, MarkMap, MarkRect } from '../../edit/types'
+import type { FieldValue, FormValues, FormValuesBySource } from '../../forms/types'
 import { FullViewPage } from './FullViewPage'
 import { useFullViewDrag } from './use-full-view-drag'
+
+const NO_VALUES: FormValues = {}
 
 interface FullViewPagesProps {
   scrollRef: React.RefObject<HTMLDivElement | null>
@@ -25,17 +29,23 @@ interface FullViewPagesProps {
   marks: MarkMap
   selectTool: EditTool | null
   onMark: (pageId: string, rects: MarkRect[]) => void
+  formValues: FormValuesBySource
+  onFieldChange: (sourceId: string, fieldName: string, value: FieldValue) => void
   setView: React.Dispatch<React.SetStateAction<View>>
   resetView: () => void
   applyZoom: (nextZoom: (z: number) => number, focal?: { x: number; y: number }) => void
   runClose: () => void
 }
 
+const isEditableElement = (el: Element | null): boolean =>
+  !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
+
 export function FullViewPages(props: FullViewPagesProps): React.JSX.Element {
   const { scrollRef, drag, draggedRef, docs, viewport, di, pi } = props
   const { view, fit, vw, vh, zoomed, interactive, animating, flip, flipTransition } = props
-  const { renderVersion, marks, selectTool, onMark } = props
+  const { renderVersion, marks, selectTool, onMark, formValues, onFieldChange } = props
   const { setView, resetView, applyZoom, runClose } = props
+  const editableFocusRef = useRef(false)
 
   const { onPointerDown, onPointerMove, endDrag } = useFullViewDrag({
     drag,
@@ -53,15 +63,21 @@ export function FullViewPages(props: FullViewPagesProps): React.JSX.Element {
     <div
       className={`full-scroll${zoomed || animating ? ' locked' : ''}${zoomed ? ' pannable' : ''}`}
       ref={scrollRef}
+      onPointerDownCapture={() => {
+        editableFocusRef.current = isEditableElement(document.activeElement)
+      }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onClick={(e) => {
+        const wasTyping = editableFocusRef.current
+        editableFocusRef.current = false
         if (draggedRef.current) {
           draggedRef.current = false
           return
         }
+        if (wasTyping) return
         if (!(e.target as HTMLElement).closest('.full-page')) runClose()
       }}
     >
@@ -83,6 +99,8 @@ export function FullViewPages(props: FullViewPagesProps): React.JSX.Element {
               marks={marks[p.id]}
               selectTool={selectTool}
               onMark={(rects) => onMark(p.id, rects)}
+              formValues={formValues[p.source.id] ?? NO_VALUES}
+              onField={(fieldName, value) => onFieldChange(p.source.id, fieldName, value)}
               resetView={resetView}
               applyZoom={applyZoom}
             />

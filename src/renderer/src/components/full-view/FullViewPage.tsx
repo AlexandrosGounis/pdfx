@@ -4,7 +4,10 @@ import { useFindState } from '../../search/FindContext'
 import type { View } from './geometry'
 import { DOUBLE_CLICK_ZOOM, fitInto, TRANSITION_MS } from './geometry'
 import type { EditTool, Mark, MarkRect } from '../../edit/types'
+import type { FieldValue, FormValues } from '../../forms/types'
+import { fieldRectsForDrag } from '../../edit/field-targets'
 import { MarkLayer } from '../MarkLayer'
+import { FormLayer } from '../forms/FormLayer'
 import { SelectableTextLayer } from './edit/SelectableTextLayer'
 
 interface FullViewPageProps {
@@ -21,6 +24,8 @@ interface FullViewPageProps {
   marks: Mark[] | undefined
   selectTool: EditTool | null
   onMark: (rects: MarkRect[]) => void
+  formValues: FormValues
+  onField: (fieldName: string, value: FieldValue) => void
   resetView: () => void
   applyZoom: (nextZoom: (z: number) => number, focal?: { x: number; y: number }) => void
 }
@@ -28,7 +33,7 @@ interface FullViewPageProps {
 export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
   const { page: p, viewport, isCurrent, view, zoomed, interactive, animating } = props
   const { flip, flipTransition, renderVersion, resetView, applyZoom } = props
-  const { marks, selectTool, onMark } = props
+  const { marks, selectTool, onMark, formValues, onField } = props
 
   const { active, query, matchingPageIds, getOcrWords } = useFindState()
   const highlight = active && isCurrent && matchingPageIds.has(p.id)
@@ -49,8 +54,7 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
     style = {
       ...style,
       transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
-      transformOrigin: 'center center',
-      willChange: 'transform'
+      transformOrigin: 'center center'
     }
   }
   return (
@@ -77,6 +81,14 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
           highlightQuery={highlight ? query : undefined}
           ocrWords={highlight ? getOcrWords(`${p.source.id}:${p.pageIndex}`) : undefined}
         />
+        <FormLayer
+          pdf={p.source.pdf}
+          pageNumber={p.pageIndex + 1}
+          naturalHeight={p.height}
+          values={formValues}
+          selectTool={isCurrent ? selectTool : null}
+          onChange={onField}
+        />
         {marks && marks.length > 0 && <MarkLayer marks={marks} />}
         {isCurrent && selectTool && (
           <SelectableTextLayer
@@ -84,7 +96,15 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
             pageNumber={p.pageIndex + 1}
             naturalHeight={p.height}
             tool={selectTool}
-            onSelect={onMark}
+            onSelect={(rects, drag) => {
+              if (rects.length > 0) {
+                onMark(rects)
+              } else if (drag) {
+                void fieldRectsForDrag(p.source.pdf, p.pageIndex + 1, drag).then((fieldRects) => {
+                  if (fieldRects.length > 0) onMark(fieldRects)
+                })
+              }
+            }}
           />
         )}
       </div>

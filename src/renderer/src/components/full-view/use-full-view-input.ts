@@ -10,12 +10,18 @@ interface InputOptions extends FullViewControls {
   finishEdit: () => void
 }
 
+const isEditableTarget = (target: EventTarget | null): boolean => {
+  const el = target as HTMLElement | null
+  return !!el && (el.isContentEditable || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
+}
+
 export function useFullViewInput(opts: InputOptions): void {
   const { scrollRef, zoomedRef, phaseRef, editingRef, finishEdit } = opts
   const { resetView, applyZoom, panBy, navByKey, runClose } = opts
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
+      if (isEditableTarget(event.target)) return
       if (event.key === 'Escape') {
         if (editingRef.current) finishEdit()
         else runClose()

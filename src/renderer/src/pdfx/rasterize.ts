@@ -2,6 +2,7 @@ import { MARK_COLORS } from '../edit/types'
 import type { Mark } from '../edit/types'
 import type { PageEntry } from '../types'
 import type { RasterExportPage } from './format'
+import { openPdf } from './source'
 
 const TARGET_PIXELS = 2200
 const MIN_SCALE = 1
@@ -10,9 +11,23 @@ const REDACT_BLEED = 1
 
 export async function rasterizeMarkedPage(
   entry: PageEntry,
+  marks: Mark[],
+  filledBytes?: Uint8Array
+): Promise<RasterExportPage> {
+  const owned = filledBytes ? await openPdf(filledBytes) : null
+  try {
+    return await render(owned ?? entry.source.pdf, entry, marks)
+  } finally {
+    void owned?.destroy()
+  }
+}
+
+async function render(
+  pdf: PageEntry['source']['pdf'],
+  entry: PageEntry,
   marks: Mark[]
 ): Promise<RasterExportPage> {
-  const page = await entry.source.pdf.getPage(entry.pageIndex + 1)
+  const page = await pdf.getPage(entry.pageIndex + 1)
   const scale = Math.min(
     MAX_SCALE,
     Math.max(MIN_SCALE, TARGET_PIXELS / Math.max(entry.width, entry.height))

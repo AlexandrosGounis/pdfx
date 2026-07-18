@@ -1,4 +1,5 @@
 import { getDocument } from 'pdfjs-dist'
+import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { partitionPages, readManifest, stripExtension } from './format'
 import { findConverter } from './convert'
 import type { DocEntry, PageEntry, PdfSource } from '../types'
@@ -60,13 +61,20 @@ export async function importIntoDocs(filename: string, bytes: Uint8Array): Promi
   }))
 }
 
-export const toExportPage = (page: PageEntry, marks?: Mark[]): SourceExportPage => ({
+export const toExportPage = (
+  page: PageEntry,
+  marks?: Mark[],
+  filledBytes?: Uint8Array
+): SourceExportPage => ({
   kind: 'source',
-  sourceKey: page.source.id,
-  bytes: page.source.bytes,
+  sourceKey: filledBytes ? `${page.source.id}:filled` : page.source.id,
+  bytes: filledBytes ?? page.source.bytes,
   pageIndex: page.pageIndex,
   marks
 })
+
+export const openPdf = (bytes: Uint8Array): Promise<PDFDocumentProxy> =>
+  getDocument({ data: bytes.slice(), wasmUrl: WASM_URL }).promise
 
 export async function loadIncomingPages(
   files: { name: string; data: Uint8Array; path?: string }[],

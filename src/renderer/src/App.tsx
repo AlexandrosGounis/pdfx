@@ -7,6 +7,7 @@ import type { CanvasHandle } from './components/Canvas'
 import { useCollection } from './app/useCollection'
 import { useFullView } from './app/useFullView'
 import { useMarks } from './app/useMarks'
+import { useFormValues } from './app/useFormValues'
 import { ACTIONS, useUndoStack } from './app/undo'
 import { flipPages } from './canvas/flip-pages'
 import { useExport } from './app/useExport'
@@ -37,6 +38,7 @@ export default function App(): React.JSX.Element {
 
   const undoStack = useUndoStack()
   const markState = useMarks(undoStack.push)
+  const formState = useFormValues()
   const collection = useCollection(flash, undoStack.push)
   const fullViewState = useFullView()
   const docs = collection.docs
@@ -55,7 +57,13 @@ export default function App(): React.JSX.Element {
     [find.active, find.matchedQuery, find.result, searchIndex.getOcrWords]
   )
 
-  const { exportCollection, exportZip } = useExport(docs, markState.marks, setBusy, flash)
+  const { exportCollection, exportZip } = useExport(
+    docs,
+    markState.marks,
+    formState.values,
+    setBusy,
+    flash
+  )
   const { addFiles, openViaDialog, addPagesToDoc, handleExternalDropFiles } = useImport(
     collection,
     setBusy,
@@ -174,6 +182,7 @@ export default function App(): React.JSX.Element {
           selected={collection.selected}
           hiddenPageId={fullViewState.hiddenPageId}
           marks={markState.marks}
+          formValues={formState.values}
           dragKind={drag.dragKind}
           draggingPage={drag.draggingPage}
           dropTarget={drag.dropTarget}
@@ -203,6 +212,8 @@ export default function App(): React.JSX.Element {
             marks={markState.marks}
             onToggleMark={markState.toggleMark}
             onRestoreMarks={markState.restoreMarks}
+            formValues={formState.values}
+            onFieldChange={formState.setFieldValue}
             onActivePageChange={fullViewState.setHiddenPageId}
             onClose={fullViewState.closeFullView}
           />
