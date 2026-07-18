@@ -6,16 +6,19 @@ interface InputOptions extends FullViewControls {
   scrollRef: React.RefObject<HTMLDivElement | null>
   zoomedRef: React.MutableRefObject<boolean>
   phaseRef: React.MutableRefObject<'opening' | 'open' | 'closing'>
+  editingRef: React.MutableRefObject<boolean>
+  finishEdit: () => void
 }
 
 export function useFullViewInput(opts: InputOptions): void {
-  const { scrollRef, zoomedRef, phaseRef } = opts
+  const { scrollRef, zoomedRef, phaseRef, editingRef, finishEdit } = opts
   const { resetView, applyZoom, panBy, navByKey, runClose } = opts
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
-        runClose()
+        if (editingRef.current) finishEdit()
+        else runClose()
         return
       }
       if (phaseRef.current !== 'open') return
@@ -35,7 +38,7 @@ export function useFullViewInput(opts: InputOptions): void {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [runClose, navByKey, panBy])
+  }, [runClose, navByKey, panBy, finishEdit])
 
   useEffect(() => {
     return window.api.onZoom((action) => {

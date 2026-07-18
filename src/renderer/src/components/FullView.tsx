@@ -1,10 +1,13 @@
 import type { DocEntry } from '../types'
+import type { MarkKind, MarkMap, MarkRect } from '../edit/types'
 import type { Rect } from './full-view/geometry'
 import { useFullViewState } from './full-view/use-full-view-state'
 import { useFullViewControls } from './full-view/use-full-view-controls'
 import { useFullViewLayout } from './full-view/use-full-view-layout'
 import { useFullViewEffects } from './full-view/use-full-view-effects'
 import { useFullViewInput } from './full-view/use-full-view-input'
+import { useEditMode } from './full-view/edit/use-edit-mode'
+import { ToolCursor } from './full-view/edit/ToolCursor'
 import { FullViewChrome } from './full-view/FullViewChrome'
 import { FullViewPages } from './full-view/FullViewPages'
 
@@ -13,6 +16,9 @@ interface FullViewProps {
   startDocId: string
   startPageId: string
   originRect: Rect | null
+  marks: MarkMap
+  onToggleMark: (pageId: string, kind: MarkKind, rects: MarkRect[]) => void
+  onRestoreMarks: (map: MarkMap) => void
   onActivePageChange: (pageId: string) => void
   onClose: () => void
 }
@@ -22,10 +28,14 @@ export function FullView({
   startDocId,
   startPageId,
   originRect,
+  marks,
+  onToggleMark,
+  onRestoreMarks,
   onActivePageChange,
   onClose
 }: FullViewProps): React.JSX.Element {
   const s = useFullViewState(docs, startDocId, startPageId, originRect)
+  const edit = useEditMode(marks, onRestoreMarks)
 
   const controls = useFullViewControls({
     scrollRef: s.scrollRef,
@@ -75,6 +85,8 @@ export function FullView({
     scrollRef: s.scrollRef,
     zoomedRef: s.zoomedRef,
     phaseRef: s.phaseRef,
+    editingRef: edit.editingRef,
+    finishEdit: edit.finishEdit,
     ...controls
   })
 
@@ -102,19 +114,33 @@ export function FullView({
         flip={s.flip}
         flipTransition={s.flipTransition}
         renderVersion={s.renderVersion}
+        marks={marks}
+        selectTool={edit.editing ? edit.tool : null}
+        onMark={(pageId, rects) => {
+          if (edit.tool) onToggleMark(pageId, edit.tool, rects)
+        }}
         setView={s.setView}
         resetView={controls.resetView}
         applyZoom={controls.applyZoom}
         runClose={controls.runClose}
       />
+      {edit.editing && <div className="edit-glow" />}
       <FullViewChrome
         chromeOpacity={chromeOpacity}
         docName={s.doc.name}
         pi={s.pi}
         pageCount={s.doc.pages.length}
+        editing={edit.editing}
+        tool={edit.tool}
+        canRevert={edit.canRevert}
+        onEnterEdit={edit.enterEdit}
+        onFinishEdit={edit.finishEdit}
+        onRevert={edit.revert}
+        onToggleTool={edit.toggleTool}
         runClose={controls.runClose}
         navByKey={controls.navByKey}
       />
+      {edit.editing && edit.tool && <ToolCursor tool={edit.tool} />}
     </div>
   )
 }

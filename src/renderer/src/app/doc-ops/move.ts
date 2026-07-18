@@ -1,6 +1,7 @@
 import { uniqueDocName } from '../names'
 import type { DocEntry } from '../../types'
 import type { PageRef } from '../types'
+import type { PagePlacement } from '../undo'
 
 export function movePageInto(
   docs: DocEntry[],
@@ -57,4 +58,32 @@ export function movePageToNewDoc(
   const name = uniqueDocName(sourceDoc.name, new Set(next.map((d) => d.name)))
   const newDoc: DocEntry = { id: newDocId, name, pages: [page] }
   return [...next.slice(0, insertAt), newDoc, ...next.slice(insertAt)]
+}
+
+export function pagePlacement(docs: DocEntry[], pageId: string): PagePlacement | null {
+  const docIndex = docs.findIndex((d) => d.pages.some((p) => p.id === pageId))
+  if (docIndex === -1) return null
+  const doc = docs[docIndex]
+  return {
+    docId: doc.id,
+    docName: doc.name,
+    docIndex,
+    pageIndex: doc.pages.findIndex((p) => p.id === pageId)
+  }
+}
+
+export function placePage(docs: DocEntry[], pageId: string, at: PagePlacement): DocEntry[] {
+  const holder = docs.find((d) => d.pages.some((p) => p.id === pageId))
+  if (!holder) return docs
+  if (docs.some((d) => d.id === at.docId)) {
+    return movePageInto(docs, { docId: holder.id, pageId }, at.docId, at.pageIndex)
+  }
+  const page = holder.pages.find((p) => p.id === pageId)
+  if (!page) return docs
+  const remaining = docs
+    .map((d) => (d.id === holder.id ? { ...d, pages: d.pages.filter((p) => p.id !== pageId) } : d))
+    .filter((d) => d.pages.length > 0)
+  const insertAt = Math.max(0, Math.min(remaining.length, at.docIndex))
+  const restored: DocEntry = { id: at.docId, name: at.docName, pages: [page] }
+  return [...remaining.slice(0, insertAt), restored, ...remaining.slice(insertAt)]
 }

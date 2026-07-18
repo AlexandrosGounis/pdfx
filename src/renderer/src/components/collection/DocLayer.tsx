@@ -3,6 +3,7 @@ import { BASE_PAGE_HEIGHT, DOC_SLOT } from '../../canvas/layout'
 import { DocumentRow } from '../DocumentRow'
 import type { DocPlacement } from '../../canvas/layout'
 import type { PageRef } from '../../app/types'
+import type { MarkMap } from '../../edit/types'
 
 interface DocLayerProps {
   items: DocPlacement[]
@@ -12,6 +13,7 @@ interface DocLayerProps {
   collapsedId: string | null
   draggingPage: PageRef | null
   hiddenPageId: string | null
+  marks: MarkMap
   intoDocId: string | null
   intoIndex: number
   intoGhostWidth: number
@@ -56,6 +58,7 @@ function DocLayerImpl(props: DocLayerProps): React.JSX.Element {
                   ? props.hiddenPageId
                   : null
               }
+              marks={props.marks}
               intoGhost={
                 intoDocId === doc.id
                   ? { index: intoIndex, width: intoGhostWidth, height: intoGhostHeight }

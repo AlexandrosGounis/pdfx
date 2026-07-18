@@ -10,6 +10,9 @@
   --accent-ink: #1a1a1c;
   --accent-hover: #ffffff;
   --select: #4479ff;
+  --yellow: #ffd60a;
+  --yellow-hover: #ffdf3d;
+  --yellow-ink: #1a1a1c;
   --hover: rgba(255, 255, 255, 0.08);
   --group-bg: rgba(255, 255, 255, 0.05);
   --control: rgba(255, 255, 255, 0.12);
@@ -190,6 +193,16 @@ a.btn {
 
 .btn.ghost:hover:not(:disabled) {
   background: var(--hover);
+}
+
+.btn.yellow {
+  border-radius: 999px;
+  background: var(--yellow);
+  color: var(--yellow-ink);
+}
+
+.btn.yellow:hover:not(:disabled) {
+  background: var(--yellow-hover);
 }
 
 /* Pill buttons with a liquid-glass gradient bezel (the masked ::before). The
@@ -969,6 +982,7 @@ a.btn {
 }
 
 .full-chrome .icon-btn,
+.full-chrome .btn,
 .full-chrome .full-nav {
   pointer-events: auto;
 }
@@ -997,8 +1011,33 @@ a.btn {
   padding: 5px 12px;
 }
 
-.full-bar .icon-btn {
+.full-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.full-actions .btn.glass {
+  background: rgba(19, 19, 22, 0.72);
+}
+
+.full-actions .btn.glass:hover:not(:disabled) {
+  background: rgba(19, 19, 22, 0.85);
+}
+
+.full-actions .btn.glass.on {
+  background: linear-gradient(rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.2))
+    rgba(19, 19, 22, 0.72);
+  color: var(--yellow);
+}
+
+.full-actions .btn.glass.on:hover:not(:disabled) {
+  background: linear-gradient(rgba(255, 214, 10, 0.28), rgba(255, 214, 10, 0.28))
+    rgba(19, 19, 22, 0.72);
+}
+
+.full-bar .icon-btn {
   width: 30px;
   height: 30px;
   color: var(--ink);
@@ -1124,6 +1163,75 @@ a.btn {
 
 .full-nav.next {
   right: 18px;
+}
+
+.edit-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 214, 10, 0.16), rgba(255, 214, 10, 0));
+  animation: edit-glow-in 0.6s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes edit-glow-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mark-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: clip;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.mark-rect {
+  position: absolute;
+  border-radius: 1px;
+}
+
+.edit-select-layer {
+  pointer-events: auto;
+  mix-blend-mode: normal;
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.edit-select-layer ::selection {
+  background: rgba(255, 214, 10, 0.45);
+}
+
+.edit-select-layer.redact ::selection {
+  background: rgba(16, 16, 18, 0.8);
+}
+
+.edit-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  pointer-events: none;
+  color: var(--yellow);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+.edit-cursor.redact {
+  color: #16161a;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.55));
 }
 
 .full-count {

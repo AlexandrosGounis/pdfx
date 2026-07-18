@@ -1,8 +1,9 @@
 import { useCallback } from 'react'
 import { zipSync } from 'fflate'
 import { buildPdf, buildPdfx, stripExtension } from '../pdfx/format'
-import { toExportPage } from '../pdfx/source'
+import { prepareExportPage } from '../pdfx/export-pages'
 import type { DocEntry } from '../types'
+import type { MarkMap } from '../edit/types'
 
 const PDFX_FILTER = { name: 'PDFX', extensions: ['pdfx'] }
 const PDF_FILTER = { name: 'PDF', extensions: ['pdf'] }
@@ -11,9 +12,15 @@ const ILLEGAL_FILENAME_CHARS = /[\\/:*?"<>|]/g
 
 export function useExport(
   docs: DocEntry[],
+  marks: MarkMap,
   setBusy: (busy: boolean) => void,
   flash: (message: string) => void
 ) {
+  const preparePages = useCallback(
+    (doc: DocEntry) => Promise.all(doc.pages.map((p) => prepareExportPage(p, marks[p.id]))),
+    [marks]
+  )
+
   const exportCollection = useCallback(
     async (kind: 'pdfx' | 'pdf') => {
       if (docs.length === 0) {
@@ -28,10 +35,10 @@ export function useExport(
       setBusy(true)
       try {
         const filename = path.split(/[\\/]/).pop() ?? `untitled.${kind}`
-        const bytes = await buildPdfx(
-          docs.map((doc) => ({ name: doc.name, pages: doc.pages.map(toExportPage) })),
-          stripExtension(filename).replace(/\.pdf$/i, '')
+        const documents = await Promise.all(
+          docs.map(async (doc) => ({ name: doc.name, pages: await preparePages(doc) }))
         )
+        const bytes = await buildPdfx(documents, stripExtension(filename).replace(/\.pdf$/i, ''))
         const saved = await window.api.writeFile(path, bytes)
         flash(`Saved ${saved}`)
       } catch (error) {
@@ -41,7 +48,7 @@ export function useExport(
         setBusy(false)
       }
     },
-    [docs, flash, setBusy]
+    [docs, preparePages, flash, setBusy]
   )
 
   const exportZip = useCallback(async () => {
@@ -60,7 +67,7 @@ export function useExport(
         let filename = `${safeName}.pdf`
         for (let n = 2; used.has(filename); n++) filename = `${safeName} (${n}).pdf`
         used.add(filename)
-        entries[filename] = await buildPdf(doc.pages.map(toExportPage))
+        entries[filename] = await buildPdf(await preparePages(doc))
       }
       const saved = await window.api.writeFile(path, zipSync(entries))
       flash(`Saved ${saved}`)
@@ -70,7 +77,7 @@ export function useExport(
     } finally {
       setBusy(false)
     }
-  }, [docs, flash, setBusy])
+  }, [docs, preparePages, flash, setBusy])
 
   return { exportCollection, exportZip }
 }

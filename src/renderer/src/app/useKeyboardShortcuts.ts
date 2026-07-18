@@ -7,6 +7,8 @@ interface KeyboardShortcutDeps {
   onDeletePage: (target: PageRef) => void
   onCopy: () => void
   onPaste: () => void
+  onUndo: () => void
+  onRedo: () => void
   onClearSelection: () => void
   findOpen: boolean
   onOpenFind: () => void
@@ -24,6 +26,8 @@ export function useKeyboardShortcuts({
   onDeletePage,
   onCopy,
   onPaste,
+  onUndo,
+  onRedo,
   onClearSelection,
   findOpen,
   onOpenFind,
@@ -35,6 +39,12 @@ export function useKeyboardShortcuts({
       if (mod && event.key.toLowerCase() === 'f' && !isEditableTarget(event.target)) {
         event.preventDefault()
         onOpenFind()
+        return
+      }
+      if (mod && event.key.toLowerCase() === 'z' && !isEditableTarget(event.target)) {
+        event.preventDefault()
+        if (event.shiftKey) onRedo()
+        else onUndo()
         return
       }
       if (active && findOpen && event.key === 'Escape') {
@@ -62,6 +72,8 @@ export function useKeyboardShortcuts({
     onDeletePage,
     onCopy,
     onPaste,
+    onUndo,
+    onRedo,
     onClearSelection,
     findOpen,
     onOpenFind,

@@ -6,6 +6,9 @@ import { CollectionCanvas } from './components/CollectionCanvas'
 import type { CanvasHandle } from './components/Canvas'
 import { useCollection } from './app/useCollection'
 import { useFullView } from './app/useFullView'
+import { useMarks } from './app/useMarks'
+import { ACTIONS, useUndoStack } from './app/undo'
+import { flipPages } from './canvas/flip-pages'
 import { useExport } from './app/useExport'
 import { useImport } from './app/useImport'
 import { usePaste } from './app/usePaste'
@@ -32,7 +35,9 @@ export default function App(): React.JSX.Element {
     toastTimer.current = setTimeout(() => setToast(null), TOAST_MS)
   }, [])
 
-  const collection = useCollection(flash)
+  const undoStack = useUndoStack()
+  const markState = useMarks(undoStack.push)
+  const collection = useCollection(flash, undoStack.push)
   const fullViewState = useFullView()
   const docs = collection.docs
   const layout = useMemo(() => computeLayout(docs), [docs])
@@ -50,7 +55,7 @@ export default function App(): React.JSX.Element {
     [find.active, find.matchedQuery, find.result, searchIndex.getOcrWords]
   )
 
-  const { exportCollection, exportZip } = useExport(docs, setBusy, flash)
+  const { exportCollection, exportZip } = useExport(docs, markState.marks, setBusy, flash)
   const { addFiles, openViaDialog, addPagesToDoc, handleExternalDropFiles } = useImport(
     collection,
     setBusy,
@@ -67,12 +72,30 @@ export default function App(): React.JSX.Element {
   })
 
   const onPaste = useCallback(() => void handlePaste(), [handlePaste])
+  const { undo: popUndo, redo: popRedo } = undoStack
+  const { applyUndo: applyMarkUndo, applyRedo: applyMarkRedo } = markState
+  const { placePageAt } = collection
+  const onUndo = useCallback(() => {
+    const entry = popUndo()
+    if (!entry) return
+    if (entry.action === ACTIONS.MARK) applyMarkUndo(entry)
+    else flipPages(() => placePageAt(entry.payload.pageId, entry.payload.from))
+  }, [popUndo, applyMarkUndo, placePageAt])
+  const onRedo = useCallback(() => {
+    const entry = popRedo()
+    if (!entry) return
+    if (entry.action === ACTIONS.MARK) applyMarkRedo(entry)
+    else flipPages(() => placePageAt(entry.payload.pageId, entry.payload.to))
+  }, [popRedo, applyMarkRedo, placePageAt])
+
   useKeyboardShortcuts({
     active: !fullViewState.fullView,
     selected: collection.selected,
     onDeletePage: collection.deletePage,
     onCopy: collection.copySelected,
     onPaste,
+    onUndo,
+    onRedo,
     onClearSelection: collection.clearSelection,
     findOpen: find.open,
     onOpenFind: find.openFind,
@@ -150,6 +173,7 @@ export default function App(): React.JSX.Element {
           renderVersion={renderVersion}
           selected={collection.selected}
           hiddenPageId={fullViewState.hiddenPageId}
+          marks={markState.marks}
           dragKind={drag.dragKind}
           draggingPage={drag.draggingPage}
           dropTarget={drag.dropTarget}
@@ -176,6 +200,9 @@ export default function App(): React.JSX.Element {
             startDocId={fullView.docId}
             startPageId={fullView.pageId}
             originRect={fullView.originRect}
+            marks={markState.marks}
+            onToggleMark={markState.toggleMark}
+            onRestoreMarks={markState.restoreMarks}
             onActivePageChange={fullViewState.setHiddenPageId}
             onClose={fullViewState.closeFullView}
           />

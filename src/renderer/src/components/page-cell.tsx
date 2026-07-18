@@ -1,8 +1,10 @@
 import { memo } from 'react'
 import type { PageEntry } from '../types'
 import type { OcrWord } from '../ocr/types'
+import type { Mark } from '../edit/types'
 import { pageDisplayWidth } from '../canvas/layout'
 import { PageView } from './PageView'
+import { MarkLayer } from './MarkLayer'
 import { buildPageDragImage } from './page-drag-image'
 
 interface PageCellProps {
@@ -16,6 +18,7 @@ interface PageCellProps {
   dimmed: boolean
   highlightQuery: string | undefined
   ocrWords: OcrWord[] | undefined
+  marks: Mark[] | undefined
   pagesDraggable: boolean
   visibleNumber: number
   onSelectPage: (docId: string, pageId: string) => void
@@ -35,6 +38,7 @@ function PageCellImpl({
   dimmed,
   highlightQuery,
   ocrWords,
+  marks,
   pagesDraggable,
   visibleNumber,
   onSelectPage,
@@ -96,6 +100,7 @@ function PageCellImpl({
         highlightQuery={highlightQuery}
         ocrWords={ocrWords}
       />
+      {marks && marks.length > 0 && <MarkLayer marks={marks} />}
       <span className="page-number">{visibleNumber}</span>
     </div>
   )
