@@ -40,8 +40,7 @@ export function drawElements(page: PDFPage, elements: PageElement[] | undefined)
   if (!elements || elements.length === 0) return
   const box = page.getCropBox()
   const rot = normalizeRotation(page.getRotation().angle)
-  const toUser = (p: { x: number; y: number }): UserPoint =>
-    visualPointToUser(p.x, p.y, box, rot)
+  const toUser = (p: { x: number; y: number }): UserPoint => visualPointToUser(p.x, p.y, box, rot)
   const operators: PDFOperator[] = [
     pushGraphicsState(),
     setLineCap(LineCapStyle.Round),

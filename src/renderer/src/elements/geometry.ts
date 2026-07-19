@@ -57,17 +57,25 @@ export function smoothPathData(points: ElementPoint[], width: number, height: nu
     .join(' ')
 }
 
+const MIN_POINT_DISTANCE = 0.0015
+const NEIGHBOR_WEIGHT = 0.125
+
 export function smoothPoints(points: ElementPoint[]): ElementPoint[] {
   if (points.length < 3) return points
+  const self = 1 - NEIGHBOR_WEIGHT * 2
   const smoothed: ElementPoint[] = [points[0]]
   for (let i = 1; i < points.length - 1; i++) {
     smoothed.push({
-      x: points[i - 1].x * 0.25 + points[i].x * 0.5 + points[i + 1].x * 0.25,
-      y: points[i - 1].y * 0.25 + points[i].y * 0.5 + points[i + 1].y * 0.25
+      x: points[i - 1].x * NEIGHBOR_WEIGHT + points[i].x * self + points[i + 1].x * NEIGHBOR_WEIGHT,
+      y: points[i - 1].y * NEIGHBOR_WEIGHT + points[i].y * self + points[i + 1].y * NEIGHBOR_WEIGHT
     })
   }
   smoothed.push(points[points.length - 1])
   return smoothed
+}
+
+export function refineInkPoints(points: ElementPoint[]): ElementPoint[] {
+  return smoothPoints(thinPoints(points, MIN_POINT_DISTANCE))
 }
 
 export function thinPoints(points: ElementPoint[], minDistance: number): ElementPoint[] {

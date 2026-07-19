@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { smoothPathData } from '../../elements/geometry'
+import { refineInkPoints, smoothPathData } from '../../elements/geometry'
 import { INK_COLOR, INK_STROKE_WIDTH } from '../../elements/types'
 import type { ElementPoint } from '../../elements/types'
 
@@ -58,7 +58,7 @@ export function DrawLayer({
           aria-hidden="true"
         >
           <path
-            d={smoothPathData(stroke, naturalWidth, naturalHeight)}
+            d={smoothPathData(refineInkPoints(stroke), naturalWidth, naturalHeight)}
             fill="none"
             stroke={INK_COLOR}
             strokeWidth={INK_STROKE_WIDTH}

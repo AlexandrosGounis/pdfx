@@ -1,12 +1,11 @@
 import { useCallback, useRef, useState } from 'react'
 import { INK_COLOR, INK_STROKE_WIDTH } from '../elements/types'
 import type { ElementMap, ElementPoint, PageElement } from '../elements/types'
-import { bboxOfPoints, smoothPoints, thinPoints } from '../elements/geometry'
+import { bboxOfPoints, refineInkPoints } from '../elements/geometry'
 import { ACTIONS } from './undo'
 import type { ElementUndoEntry, UndoEntry } from './undo'
 
 const BBOX_PAD_POINTS = 9
-const MIN_POINT_DISTANCE = 0.0015
 
 export function useElements(pushUndo: (entry: UndoEntry) => void) {
   const [elements, setElements] = useState<ElementMap>({})
@@ -22,7 +21,7 @@ export function useElements(pushUndo: (entry: UndoEntry) => void) {
       pageHeight: number
     ): PageElement | null => {
       if (points.length < 2) return null
-      const thinned = smoothPoints(thinPoints(points, MIN_POINT_DISTANCE))
+      const thinned = refineInkPoints(points)
       const element: PageElement = {
         id: crypto.randomUUID(),
         kind: 'ink',
