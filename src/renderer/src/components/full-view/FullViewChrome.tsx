@@ -41,6 +41,13 @@ export function FullViewChrome({
           {editing ? (
             <>
               <button
+                className={`btn glass${tool === 'draw' ? ' on' : ''}`}
+                aria-pressed={tool === 'draw'}
+                onClick={() => onToggleTool('draw')}
+              >
+                Sign
+              </button>
+              <button
                 className={`btn glass${tool === 'highlight' ? ' on' : ''}`}
                 aria-pressed={tool === 'highlight'}
                 onClick={() => onToggleTool('highlight')}

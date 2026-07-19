@@ -8,6 +8,7 @@ import { useCollection } from './app/useCollection'
 import { useFullView } from './app/useFullView'
 import { useMarks } from './app/useMarks'
 import { useFormValues } from './app/useFormValues'
+import { useElements } from './app/useElements'
 import { ACTIONS, useUndoStack } from './app/undo'
 import { flipPages } from './canvas/flip-pages'
 import { useExport } from './app/useExport'
@@ -39,6 +40,7 @@ export default function App(): React.JSX.Element {
   const undoStack = useUndoStack()
   const markState = useMarks(undoStack.push)
   const formState = useFormValues()
+  const elementState = useElements(undoStack.push)
   const collection = useCollection(flash, undoStack.push)
   const fullViewState = useFullView()
   const docs = collection.docs
@@ -61,6 +63,7 @@ export default function App(): React.JSX.Element {
     docs,
     markState.marks,
     formState.values,
+    elementState.elements,
     setBusy,
     flash
   )
@@ -82,19 +85,22 @@ export default function App(): React.JSX.Element {
   const onPaste = useCallback(() => void handlePaste(), [handlePaste])
   const { undo: popUndo, redo: popRedo } = undoStack
   const { applyUndo: applyMarkUndo, applyRedo: applyMarkRedo } = markState
+  const { applyUndo: applyElementUndo, applyRedo: applyElementRedo } = elementState
   const { placePageAt } = collection
   const onUndo = useCallback(() => {
     const entry = popUndo()
     if (!entry) return
     if (entry.action === ACTIONS.MARK) applyMarkUndo(entry)
+    else if (entry.action === ACTIONS.ELEMENT) applyElementUndo(entry)
     else flipPages(() => placePageAt(entry.payload.pageId, entry.payload.from))
-  }, [popUndo, applyMarkUndo, placePageAt])
+  }, [popUndo, applyMarkUndo, applyElementUndo, placePageAt])
   const onRedo = useCallback(() => {
     const entry = popRedo()
     if (!entry) return
     if (entry.action === ACTIONS.MARK) applyMarkRedo(entry)
+    else if (entry.action === ACTIONS.ELEMENT) applyElementRedo(entry)
     else flipPages(() => placePageAt(entry.payload.pageId, entry.payload.to))
-  }, [popRedo, applyMarkRedo, placePageAt])
+  }, [popRedo, applyMarkRedo, applyElementRedo, placePageAt])
 
   useKeyboardShortcuts({
     active: !fullViewState.fullView,
@@ -183,6 +189,7 @@ export default function App(): React.JSX.Element {
           hiddenPageId={fullViewState.hiddenPageId}
           marks={markState.marks}
           formValues={formState.values}
+          elements={elementState.elements}
           dragKind={drag.dragKind}
           draggingPage={drag.draggingPage}
           dropTarget={drag.dropTarget}
@@ -214,6 +221,10 @@ export default function App(): React.JSX.Element {
             onRestoreMarks={markState.restoreMarks}
             formValues={formState.values}
             onFieldChange={formState.setFieldValue}
+            elements={elementState.elements}
+            onAddInk={elementState.addInk}
+            onRemoveElement={elementState.removeElement}
+            onMoveElement={elementState.moveElement}
             onActivePageChange={fullViewState.setHiddenPageId}
             onClose={fullViewState.closeFullView}
           />

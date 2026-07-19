@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import type { EditTool } from '../../../edit/types'
+import type { MarkKind } from '../../../edit/types'
 import { HighlighterIcon, TapeIcon } from '../../icons'
 
-export function ToolCursor({ tool }: { tool: EditTool }): React.JSX.Element {
+export function ToolCursor({ tool }: { tool: MarkKind }): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

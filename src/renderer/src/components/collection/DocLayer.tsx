@@ -5,6 +5,7 @@ import type { DocPlacement } from '../../canvas/layout'
 import type { PageRef } from '../../app/types'
 import type { MarkMap } from '../../edit/types'
 import type { FormValuesBySource } from '../../forms/types'
+import type { ElementMap } from '../../elements/types'
 
 interface DocLayerProps {
   items: DocPlacement[]
@@ -16,6 +17,7 @@ interface DocLayerProps {
   hiddenPageId: string | null
   marks: MarkMap
   formValues: FormValuesBySource
+  elements: ElementMap
   intoDocId: string | null
   intoIndex: number
   intoGhostWidth: number
@@ -62,6 +64,7 @@ function DocLayerImpl(props: DocLayerProps): React.JSX.Element {
               }
               marks={props.marks}
               formValues={props.formValues}
+              elements={props.elements}
               intoGhost={
                 intoDocId === doc.id
                   ? { index: intoIndex, width: intoGhostWidth, height: intoGhostHeight }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { getFormFields } from '../../forms/extract'
 import type { FieldValue, FormFieldInfo, FormValues } from '../../forms/types'
-import type { EditTool } from '../../edit/types'
+import type { MarkKind } from '../../edit/types'
 import { FormFieldBox } from './FormFieldBox'
 
 interface FormLayerProps {
@@ -11,7 +11,7 @@ interface FormLayerProps {
   naturalHeight: number
   values: FormValues
   readOnly?: boolean
-  selectTool?: EditTool | null
+  selectTool?: MarkKind | null
   onChange?: (fieldName: string, value: FieldValue) => void
 }
 

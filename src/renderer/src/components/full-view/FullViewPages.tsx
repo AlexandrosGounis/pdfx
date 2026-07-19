@@ -3,6 +3,7 @@ import type { DocEntry } from '../../types'
 import type { View } from './geometry'
 import type { EditTool, MarkMap, MarkRect } from '../../edit/types'
 import type { FieldValue, FormValues, FormValuesBySource } from '../../forms/types'
+import type { ElementMap, ElementPoint } from '../../elements/types'
 import { FullViewPage } from './FullViewPage'
 import { useFullViewDrag } from './use-full-view-drag'
 
@@ -31,6 +32,11 @@ interface FullViewPagesProps {
   onMark: (pageId: string, rects: MarkRect[]) => void
   formValues: FormValuesBySource
   onFieldChange: (sourceId: string, fieldName: string, value: FieldValue) => void
+  elements: ElementMap
+  selectedElementId: string | null
+  onSelectElement: (pageId: string, id: string | null) => void
+  onMoveElement: (pageId: string, id: string, dx: number, dy: number) => void
+  onDraw: (pageId: string, points: ElementPoint[], pageWidth: number, pageHeight: number) => void
   setView: React.Dispatch<React.SetStateAction<View>>
   resetView: () => void
   applyZoom: (nextZoom: (z: number) => number, focal?: { x: number; y: number }) => void
@@ -44,6 +50,7 @@ export function FullViewPages(props: FullViewPagesProps): React.JSX.Element {
   const { scrollRef, drag, draggedRef, docs, viewport, di, pi } = props
   const { view, fit, vw, vh, zoomed, interactive, animating, flip, flipTransition } = props
   const { renderVersion, marks, selectTool, onMark, formValues, onFieldChange } = props
+  const { elements, selectedElementId, onSelectElement, onMoveElement, onDraw } = props
   const { setView, resetView, applyZoom, runClose } = props
   const editableFocusRef = useRef(false)
 
@@ -101,6 +108,11 @@ export function FullViewPages(props: FullViewPagesProps): React.JSX.Element {
               onMark={(rects) => onMark(p.id, rects)}
               formValues={formValues[p.source.id] ?? NO_VALUES}
               onField={(fieldName, value) => onFieldChange(p.source.id, fieldName, value)}
+              elements={elements[p.id]}
+              selectedElementId={selectedElementId}
+              onSelectElement={(id) => onSelectElement(p.id, id)}
+              onMoveElement={(id, dx, dy) => onMoveElement(p.id, id, dx, dy)}
+              onDraw={(points) => onDraw(p.id, points, p.width, p.height)}
               resetView={resetView}
               applyZoom={applyZoom}
             />

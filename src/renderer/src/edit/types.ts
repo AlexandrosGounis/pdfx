@@ -1,6 +1,9 @@
 export type MarkKind = 'highlight' | 'redact'
 
-export type EditTool = MarkKind
+export type EditTool = MarkKind | 'draw'
+
+export const isMarkTool = (tool: EditTool | null): tool is MarkKind =>
+  tool === 'highlight' || tool === 'redact'
 
 export type MarkColor = 'yellow' | 'black'
 

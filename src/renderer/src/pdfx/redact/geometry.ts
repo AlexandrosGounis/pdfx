@@ -82,6 +82,19 @@ function mapPoint(
   return { x, y: h - y }
 }
 
+export function visualPointToUser(
+  nx: number,
+  ny: number,
+  box: CropBox,
+  rot: number
+): { x: number; y: number } {
+  const sideways = rot === 90 || rot === 270
+  const vw = sideways ? box.height : box.width
+  const vh = sideways ? box.width : box.height
+  const p = mapPoint(nx * vw, ny * vh, box.width, box.height, rot)
+  return { x: box.x + p.x, y: box.y + p.y }
+}
+
 export function visualRectToUser(r: MarkRect, box: CropBox, rot: number): Box {
   const sideways = rot === 90 || rot === 270
   const vw = sideways ? box.height : box.width

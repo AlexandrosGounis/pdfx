@@ -6,6 +6,7 @@ import { fillDocSources } from '../forms/fill'
 import type { DocEntry } from '../types'
 import type { MarkMap } from '../edit/types'
 import type { FormValuesBySource } from '../forms/types'
+import type { ElementMap } from '../elements/types'
 
 const PDFX_FILTER = { name: 'PDFX', extensions: ['pdfx'] }
 const PDF_FILTER = { name: 'PDF', extensions: ['pdf'] }
@@ -16,13 +17,18 @@ export function useExport(
   docs: DocEntry[],
   marks: MarkMap,
   formValues: FormValuesBySource,
+  elements: ElementMap,
   setBusy: (busy: boolean) => void,
   flash: (message: string) => void
 ) {
   const preparePages = useCallback(
     (doc: DocEntry, filled: Map<string, Uint8Array>) =>
-      Promise.all(doc.pages.map((p) => prepareExportPage(p, marks[p.id], filled.get(p.source.id)))),
-    [marks]
+      Promise.all(
+        doc.pages.map((p) =>
+          prepareExportPage(p, marks[p.id], filled.get(p.source.id), elements[p.id])
+        )
+      ),
+    [marks, elements]
   )
 
   const exportCollection = useCallback(
