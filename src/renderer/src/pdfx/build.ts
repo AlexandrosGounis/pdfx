@@ -1,14 +1,17 @@
 import { PDFDocument } from 'pdf-lib'
+import type { PDFPage } from 'pdf-lib'
 
 import { MANIFEST_NAME, PDFX_VERSION } from './format'
 import { drawMarks } from './marks'
+import { drawElements } from './elements'
 import { registerAcroForm } from './form-fields'
 import type { ExportDocument, ExportPage, PdfxManifest, RasterExportPage } from './format'
 
-async function addRasterPage(output: PDFDocument, page: RasterExportPage): Promise<void> {
+async function addRasterPage(output: PDFDocument, page: RasterExportPage): Promise<PDFPage> {
   const image = await output.embedPng(page.png)
   const added = output.addPage([page.width, page.height])
   added.drawImage(image, { x: 0, y: 0, width: page.width, height: page.height })
+  return added
 }
 
 async function addExportPage(
@@ -17,7 +20,8 @@ async function addExportPage(
   page: ExportPage
 ): Promise<void> {
   if (page.kind === 'raster') {
-    await addRasterPage(output, page)
+    const added = await addRasterPage(output, page)
+    drawElements(added, page.elements)
     return
   }
   let source = sources.get(page.sourceKey)
@@ -27,6 +31,7 @@ async function addExportPage(
   }
   const [copied] = await output.copyPages(source, [page.pageIndex])
   output.addPage(copied)
+  drawElements(copied, page.elements)
   drawMarks(copied, page.marks)
 }
 

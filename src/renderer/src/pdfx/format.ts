@@ -1,5 +1,6 @@
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import type { Mark } from '../edit/types'
+import type { PageElement } from '../elements/types'
 
 export { buildPdf, buildPdfx } from './build'
 
@@ -28,6 +29,7 @@ export interface SourceExportPage {
   sourceKey: string
   pageIndex: number
   marks?: Mark[]
+  elements?: PageElement[]
 }
 
 export interface RasterExportPage {
@@ -35,6 +37,7 @@ export interface RasterExportPage {
   png: Uint8Array
   width: number
   height: number
+  elements?: PageElement[]
 }
 
 export type ExportPage = SourceExportPage | RasterExportPage

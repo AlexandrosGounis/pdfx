@@ -3,10 +3,12 @@ import type { PageEntry } from '../types'
 import type { OcrWord } from '../ocr/types'
 import type { Mark } from '../edit/types'
 import { hasAnyValue } from '../forms/types'
+import type { PageElement } from '../elements/types'
 import type { FormValues } from '../forms/types'
 import { pageDisplayWidth } from '../canvas/layout'
 import { PageView } from './PageView'
 import { MarkLayer } from './MarkLayer'
+import { ElementsLayer } from './elements/ElementsLayer'
 import { FormLayer } from './forms/FormLayer'
 import { buildPageDragImage } from './page-drag-image'
 
@@ -23,6 +25,7 @@ interface PageCellProps {
   ocrWords: OcrWord[] | undefined
   marks: Mark[] | undefined
   formValues: FormValues | undefined
+  elements: PageElement[] | undefined
   pagesDraggable: boolean
   visibleNumber: number
   onSelectPage: (docId: string, pageId: string) => void
@@ -44,6 +47,7 @@ function PageCellImpl({
   ocrWords,
   marks,
   formValues,
+  elements,
   pagesDraggable,
   visibleNumber,
   onSelectPage,
@@ -112,6 +116,16 @@ function PageCellImpl({
           naturalHeight={page.height}
           values={formValues!}
           readOnly
+        />
+      )}
+      {elements && elements.length > 0 && (
+        <ElementsLayer
+          elements={elements}
+          naturalWidth={page.width}
+          naturalHeight={page.height}
+          interactive={false}
+          selectedId={null}
+          onSelect={() => {}}
         />
       )}
       {marks && marks.length > 0 && <MarkLayer marks={marks} />}

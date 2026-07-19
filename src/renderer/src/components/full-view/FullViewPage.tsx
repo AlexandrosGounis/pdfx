@@ -4,10 +4,14 @@ import { useFindState } from '../../search/FindContext'
 import type { View } from './geometry'
 import { DOUBLE_CLICK_ZOOM, fitInto, TRANSITION_MS } from './geometry'
 import type { EditTool, Mark, MarkRect } from '../../edit/types'
+import { isMarkTool } from '../../edit/types'
 import type { FieldValue, FormValues } from '../../forms/types'
+import type { ElementPoint, PageElement } from '../../elements/types'
 import { fieldRectsForDrag } from '../../edit/field-targets'
 import { MarkLayer } from '../MarkLayer'
 import { FormLayer } from '../forms/FormLayer'
+import { ElementsLayer } from '../elements/ElementsLayer'
+import { DrawLayer } from '../elements/DrawLayer'
 import { SelectableTextLayer } from './edit/SelectableTextLayer'
 
 interface FullViewPageProps {
@@ -26,6 +30,11 @@ interface FullViewPageProps {
   onMark: (rects: MarkRect[]) => void
   formValues: FormValues
   onField: (fieldName: string, value: FieldValue) => void
+  elements: PageElement[] | undefined
+  selectedElementId: string | null
+  onSelectElement: (id: string | null) => void
+  onMoveElement: (id: string, dx: number, dy: number) => void
+  onDraw: (points: ElementPoint[]) => void
   resetView: () => void
   applyZoom: (nextZoom: (z: number) => number, focal?: { x: number; y: number }) => void
 }
@@ -34,6 +43,7 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
   const { page: p, viewport, isCurrent, view, zoomed, interactive, animating } = props
   const { flip, flipTransition, renderVersion, resetView, applyZoom } = props
   const { marks, selectTool, onMark, formValues, onField } = props
+  const { elements, selectedElementId, onSelectElement, onMoveElement, onDraw } = props
 
   const { active, query, matchingPageIds, getOcrWords } = useFindState()
   const highlight = active && isCurrent && matchingPageIds.has(p.id)
@@ -86,11 +96,24 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
           pageNumber={p.pageIndex + 1}
           naturalHeight={p.height}
           values={formValues}
-          selectTool={isCurrent ? selectTool : null}
+          selectTool={isCurrent && isMarkTool(selectTool) ? selectTool : null}
           onChange={onField}
         />
+        {elements && elements.length > 0 && (
+          <ElementsLayer
+            elements={elements}
+            naturalWidth={p.width}
+            naturalHeight={p.height}
+            interactive={isCurrent && (selectTool === null || selectTool === 'draw')}
+            aboveDraw={isCurrent && selectTool === 'draw'}
+            zoomScale={isCurrent && zoomed ? view.zoom : 1}
+            selectedId={selectedElementId}
+            onSelect={onSelectElement}
+            onMove={onMoveElement}
+          />
+        )}
         {marks && marks.length > 0 && <MarkLayer marks={marks} />}
-        {isCurrent && selectTool && (
+        {isCurrent && isMarkTool(selectTool) && (
           <SelectableTextLayer
             pdf={p.source.pdf}
             pageNumber={p.pageIndex + 1}
@@ -106,6 +129,9 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
               }
             }}
           />
+        )}
+        {isCurrent && selectTool === 'draw' && (
+          <DrawLayer naturalWidth={p.width} naturalHeight={p.height} onCommit={onDraw} />
         )}
       </div>
     </div>

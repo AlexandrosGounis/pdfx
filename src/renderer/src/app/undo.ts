@@ -1,9 +1,11 @@
 import { useCallback, useRef } from 'react'
 import type { Mark, MarkMap } from '../edit/types'
+import type { PageElement } from '../elements/types'
 
 export const ACTIONS = {
   MARK: 'mark',
-  MOVE_PAGE: 'move-page'
+  MOVE_PAGE: 'move-page',
+  ELEMENT: 'element'
 } as const
 
 export interface PagePlacement {
@@ -37,7 +39,19 @@ export type MovePageUndoEntry = {
   payload: MovePagePayload
 }
 
-export type UndoEntry = MarkUndoEntry | MovePageUndoEntry
+export type ElementUndoEntry =
+  | {
+      action: typeof ACTIONS.ELEMENT
+      value: 'add' | 'remove'
+      payload: { pageId: string; element: PageElement }
+    }
+  | {
+      action: typeof ACTIONS.ELEMENT
+      value: 'move'
+      payload: { pageId: string; before: PageElement; after: PageElement }
+    }
+
+export type UndoEntry = MarkUndoEntry | MovePageUndoEntry | ElementUndoEntry
 
 const UNDO_CAP = 30
 

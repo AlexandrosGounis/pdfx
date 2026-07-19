@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { TextLayer } from 'pdfjs-dist'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
-import type { EditTool, MarkRect } from '../../../edit/types'
+import type { MarkKind, MarkRect } from '../../../edit/types'
 import { selectionRects } from '../../../edit/selection'
 
 interface SelectableTextLayerProps {
   pdf: PDFDocumentProxy
   pageNumber: number
   naturalHeight: number
-  tool: EditTool
+  tool: MarkKind
   onSelect: (rects: MarkRect[], drag: MarkRect | null) => void
 }
 

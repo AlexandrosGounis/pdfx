@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
 import type { DocEntry } from '../types'
 import type { MarkKind, MarkMap, MarkRect } from '../edit/types'
+import { isMarkTool } from '../edit/types'
 import type { FieldValue, FormValuesBySource } from '../forms/types'
+import type { ElementMap, ElementPoint } from '../elements/types'
 import type { Rect } from './full-view/geometry'
+import { useElementSelection } from './full-view/use-element-selection'
 import { useFullViewState } from './full-view/use-full-view-state'
 import { useFullViewControls } from './full-view/use-full-view-controls'
 import { useFullViewLayout } from './full-view/use-full-view-layout'
@@ -23,6 +26,10 @@ interface FullViewProps {
   onRestoreMarks: (map: MarkMap) => void
   formValues: FormValuesBySource
   onFieldChange: (sourceId: string, fieldName: string, value: FieldValue) => void
+  elements: ElementMap
+  onAddInk: (pageId: string, points: ElementPoint[], pageWidth: number, pageHeight: number) => void
+  onRemoveElement: (pageId: string, elementId: string) => void
+  onMoveElement: (pageId: string, elementId: string, dx: number, dy: number) => void
   onActivePageChange: (pageId: string) => void
   onClose: () => void
 }
@@ -37,11 +44,16 @@ export function FullView({
   onRestoreMarks,
   formValues,
   onFieldChange,
+  elements,
+  onAddInk,
+  onRemoveElement,
+  onMoveElement,
   onActivePageChange,
   onClose
 }: FullViewProps): React.JSX.Element {
   const s = useFullViewState(docs, startDocId, startPageId, originRect)
   const edit = useEditMode(marks, onRestoreMarks)
+  const selection = useElementSelection(edit.editing && isMarkTool(edit.tool), onRemoveElement)
 
   useEffect(() => {
     if (!edit.editing || !edit.tool) return
@@ -134,10 +146,15 @@ export function FullView({
         marks={marks}
         selectTool={edit.editing ? edit.tool : null}
         onMark={(pageId, rects) => {
-          if (edit.tool) onToggleMark(pageId, edit.tool, rects)
+          if (isMarkTool(edit.tool)) onToggleMark(pageId, edit.tool, rects)
         }}
         formValues={formValues}
         onFieldChange={onFieldChange}
+        elements={elements}
+        selectedElementId={selection.selected?.elementId ?? null}
+        onSelectElement={selection.selectElement}
+        onMoveElement={onMoveElement}
+        onDraw={onAddInk}
         setView={s.setView}
         resetView={controls.resetView}
         applyZoom={controls.applyZoom}
@@ -159,7 +176,7 @@ export function FullView({
         runClose={controls.runClose}
         navByKey={controls.navByKey}
       />
-      {edit.editing && edit.tool && <ToolCursor tool={edit.tool} />}
+      {edit.editing && isMarkTool(edit.tool) && <ToolCursor tool={edit.tool} />}
     </div>
   )
 }
