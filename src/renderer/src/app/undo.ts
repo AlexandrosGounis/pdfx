@@ -47,7 +47,7 @@ export type ElementUndoEntry =
     }
   | {
       action: typeof ACTIONS.ELEMENT
-      value: 'move'
+      value: 'move' | 'mark' | 'edit'
       payload: { pageId: string; before: PageElement; after: PageElement }
     }
 

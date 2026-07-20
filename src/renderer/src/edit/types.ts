@@ -1,9 +1,12 @@
 export type MarkKind = 'highlight' | 'redact'
 
-export type EditTool = MarkKind | 'draw'
+export type EditTool = MarkKind | 'draw' | 'text'
 
 export const isMarkTool = (tool: EditTool | null): tool is MarkKind =>
   tool === 'highlight' || tool === 'redact'
+
+export const isElementTool = (tool: EditTool | null): tool is 'draw' | 'text' =>
+  tool === 'draw' || tool === 'text'
 
 export type MarkColor = 'yellow' | 'black'
 

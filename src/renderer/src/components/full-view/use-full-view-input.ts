@@ -75,6 +75,11 @@ export function useFullViewInput(opts: InputOptions): void {
       if (zoomedRef.current) {
         event.preventDefault()
         panBy(-event.deltaX, -event.deltaY)
+        return
+      }
+      if (editingRef.current && Math.abs(event.deltaY) >= Math.abs(event.deltaX)) {
+        event.preventDefault()
+        panBy(0, -event.deltaY)
       }
     }
     sc.addEventListener('wheel', onWheel, { passive: false })

@@ -4,6 +4,7 @@ import type { MarkKind, MarkMap, MarkRect } from '../edit/types'
 import { isMarkTool } from '../edit/types'
 import type { FieldValue, FormValuesBySource } from '../forms/types'
 import type { ElementMap, ElementPoint } from '../elements/types'
+import type { TextSpan } from '../elements/text-marks'
 import type { Rect } from './full-view/geometry'
 import { useElementSelection } from './full-view/use-element-selection'
 import { useFullViewState } from './full-view/use-full-view-state'
@@ -28,8 +29,23 @@ interface FullViewProps {
   onFieldChange: (sourceId: string, fieldName: string, value: FieldValue) => void
   elements: ElementMap
   onAddInk: (pageId: string, points: ElementPoint[], pageWidth: number, pageHeight: number) => void
+  onAddText: (
+    pageId: string,
+    text: string,
+    origin: ElementPoint,
+    pageWidth: number,
+    pageHeight: number
+  ) => void
   onRemoveElement: (pageId: string, elementId: string) => void
   onMoveElement: (pageId: string, elementId: string, dx: number, dy: number) => void
+  onToggleTextMark: (pageId: string, elementId: string, kind: MarkKind, span: TextSpan) => void
+  onUpdateText: (
+    pageId: string,
+    elementId: string,
+    text: string,
+    pageWidth: number,
+    pageHeight: number
+  ) => void
   onActivePageChange: (pageId: string) => void
   onClose: () => void
 }
@@ -46,8 +62,11 @@ export function FullView({
   onFieldChange,
   elements,
   onAddInk,
+  onAddText,
   onRemoveElement,
   onMoveElement,
+  onToggleTextMark,
+  onUpdateText,
   onActivePageChange,
   onClose
 }: FullViewProps): React.JSX.Element {
@@ -69,6 +88,7 @@ export function FullView({
   const controls = useFullViewControls({
     scrollRef: s.scrollRef,
     closingRef: s.closingRef,
+    editingRef: edit.editingRef,
     docsRef: s.docsRef,
     vpRef: s.vpRef,
     curRef: s.curRef,
@@ -80,6 +100,11 @@ export function FullView({
     setRevealed: s.setRevealed,
     onClose
   })
+
+  const { resetView } = controls
+  useEffect(() => {
+    if (!edit.editing) resetView()
+  }, [edit.editing, resetView])
 
   useFullViewLayout({
     scrollRef: s.scrollRef,
@@ -144,6 +169,7 @@ export function FullView({
         flipTransition={s.flipTransition}
         renderVersion={s.renderVersion}
         marks={marks}
+        hasSelection={selection.selected !== null}
         selectTool={edit.editing ? edit.tool : null}
         onMark={(pageId, rects) => {
           if (isMarkTool(edit.tool)) onToggleMark(pageId, edit.tool, rects)
@@ -155,6 +181,11 @@ export function FullView({
         onSelectElement={selection.selectElement}
         onMoveElement={onMoveElement}
         onDraw={onAddInk}
+        onAddText={onAddText}
+        onMarkText={(pageId, elementId, span) => {
+          if (isMarkTool(edit.tool)) onToggleTextMark(pageId, elementId, edit.tool, span)
+        }}
+        onUpdateText={onUpdateText}
         setView={s.setView}
         resetView={controls.resetView}
         applyZoom={controls.applyZoom}

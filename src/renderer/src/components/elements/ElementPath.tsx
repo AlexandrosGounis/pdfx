@@ -1,8 +1,8 @@
 import { smoothPathData } from '../../elements/geometry'
-import type { PageElement } from '../../elements/types'
+import type { InkElement } from '../../elements/types'
 
 interface ElementPathProps {
-  element: PageElement
+  element: InkElement
   width: number
   height: number
   interactive: boolean

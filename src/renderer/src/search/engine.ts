@@ -23,6 +23,7 @@ export const EMPTY_RESULT: SearchResult = {
 export interface SearchEngine {
   reconcile: (docs: DocEntry[]) => void
   search: (query: string) => SearchResult
+  setElementTexts: (byPage: Map<string, string>) => void
   setLanguage: (lang: string) => void
   getOcrWords: (sourceKey: string) => OcrWord[] | undefined
   dispose: () => void
@@ -48,6 +49,7 @@ export function createSearchEngine({
   getDocs
 }: EngineCallbacks): SearchEngine {
   const pageText = new Map<string, string>()
+  const elementText = new Map<string, string>()
   const sourceBorn = new Map<string, string>()
   const sourceOcr = new Map<string, string>()
   const sourceOcrWords = new Map<string, OcrWord[]>()
@@ -226,7 +228,16 @@ export function createSearchEngine({
       const pageIds = new Set<string>()
       let occurrences = 0
       for (const [pageId, text] of pageText) {
-        const count = countOccurrences(text, q)
+        const extra = elementText.get(pageId)
+        const count = countOccurrences(text, q) + (extra ? countOccurrences(extra, q) : 0)
+        if (count > 0) {
+          pageIds.add(pageId)
+          occurrences += count
+        }
+      }
+      for (const [pageId, extra] of elementText) {
+        if (pageText.has(pageId)) continue
+        const count = countOccurrences(extra, q)
         if (count > 0) {
           pageIds.add(pageId)
           occurrences += count
@@ -237,6 +248,23 @@ export function createSearchEngine({
         if (doc.pages.some((p) => pageIds.has(p.id))) docIds.add(doc.id)
       }
       return { pageIds, docIds, pages: pageIds.size, occurrences }
+    },
+
+    setElementTexts(byPage) {
+      let changed = false
+      for (const [pageId, text] of byPage) {
+        if (elementText.get(pageId) !== text) {
+          elementText.set(pageId, text)
+          changed = true
+        }
+      }
+      for (const pageId of [...elementText.keys()]) {
+        if (!byPage.has(pageId)) {
+          elementText.delete(pageId)
+          changed = true
+        }
+      }
+      if (changed) onChange()
     },
 
     setLanguage(next) {

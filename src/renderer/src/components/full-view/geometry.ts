@@ -25,6 +25,7 @@ export const WHEEL_ZOOM_SPEED = 0.036
 export const ZOOM_STEP = 1.4
 export const DOUBLE_CLICK_ZOOM = 2.5
 export const ARROW_PAN = 80
+export const EDIT_PAN_ALLOWANCE = 64
 export const GAP = 24
 export const TRANSITION_MS = 340
 

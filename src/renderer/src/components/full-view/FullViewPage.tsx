@@ -4,14 +4,16 @@ import { useFindState } from '../../search/FindContext'
 import type { View } from './geometry'
 import { DOUBLE_CLICK_ZOOM, fitInto, TRANSITION_MS } from './geometry'
 import type { EditTool, Mark, MarkRect } from '../../edit/types'
-import { isMarkTool } from '../../edit/types'
+import { isElementTool, isMarkTool } from '../../edit/types'
 import type { FieldValue, FormValues } from '../../forms/types'
 import type { ElementPoint, PageElement } from '../../elements/types'
+import type { TextSpan } from '../../elements/text-marks'
 import { fieldRectsForDrag } from '../../edit/field-targets'
 import { MarkLayer } from '../MarkLayer'
 import { FormLayer } from '../forms/FormLayer'
 import { ElementsLayer } from '../elements/ElementsLayer'
 import { DrawLayer } from '../elements/DrawLayer'
+import { TypeLayer } from '../elements/TypeLayer'
 import { SelectableTextLayer } from './edit/SelectableTextLayer'
 
 interface FullViewPageProps {
@@ -35,6 +37,9 @@ interface FullViewPageProps {
   onSelectElement: (id: string | null) => void
   onMoveElement: (id: string, dx: number, dy: number) => void
   onDraw: (points: ElementPoint[]) => void
+  onAddText: (text: string, origin: ElementPoint) => void
+  onMarkText: (id: string, span: TextSpan) => void
+  onUpdateText: (id: string, text: string) => void
   resetView: () => void
   applyZoom: (nextZoom: (z: number) => number, focal?: { x: number; y: number }) => void
 }
@@ -44,6 +49,7 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
   const { flip, flipTransition, renderVersion, resetView, applyZoom } = props
   const { marks, selectTool, onMark, formValues, onField } = props
   const { elements, selectedElementId, onSelectElement, onMoveElement, onDraw } = props
+  const { onAddText, onMarkText, onUpdateText } = props
 
   const { active, query, matchingPageIds, getOcrWords } = useFindState()
   const highlight = active && isCurrent && matchingPageIds.has(p.id)
@@ -60,7 +66,7 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
         : 'none',
       willChange: 'transform'
     }
-  } else if (isCurrent && zoomed) {
+  } else if (isCurrent && (zoomed || view.y !== 0)) {
     style = {
       ...style,
       transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
@@ -104,12 +110,15 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
             elements={elements}
             naturalWidth={p.width}
             naturalHeight={p.height}
-            interactive={isCurrent && (selectTool === null || selectTool === 'draw')}
-            aboveDraw={isCurrent && selectTool === 'draw'}
+            interactive={isCurrent && (selectTool === null || isElementTool(selectTool))}
+            aboveDraw={isCurrent && selectTool !== null}
             zoomScale={isCurrent && zoomed ? view.zoom : 1}
             selectedId={selectedElementId}
+            markTool={isCurrent && isMarkTool(selectTool) ? selectTool : null}
             onSelect={onSelectElement}
             onMove={onMoveElement}
+            onMarkText={onMarkText}
+            onUpdateText={onUpdateText}
           />
         )}
         {marks && marks.length > 0 && <MarkLayer marks={marks} />}
@@ -132,6 +141,9 @@ export function FullViewPage(props: FullViewPageProps): React.JSX.Element {
         )}
         {isCurrent && selectTool === 'draw' && (
           <DrawLayer naturalWidth={p.width} naturalHeight={p.height} onCommit={onDraw} />
+        )}
+        {isCurrent && selectTool === 'text' && (
+          <TypeLayer naturalHeight={p.height} onCommit={onAddText} />
         )}
       </div>
     </div>

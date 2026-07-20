@@ -1,4 +1,12 @@
-import type { ElementPoint, ElementRect } from './types'
+import type { ElementPoint, ElementRect, PageElement } from './types'
+
+export function translateElement(element: PageElement, dx: number, dy: number): PageElement {
+  const bbox = { ...element.bbox, x: element.bbox.x + dx, y: element.bbox.y + dy }
+  if (element.kind === 'text') {
+    return { ...element, origin: { x: element.origin.x + dx, y: element.origin.y + dy }, bbox }
+  }
+  return { ...element, points: element.points.map((p) => ({ x: p.x + dx, y: p.y + dy })), bbox }
+}
 
 export function bboxOfPoints(points: ElementPoint[], padX: number, padY: number): ElementRect {
   let minX = 1

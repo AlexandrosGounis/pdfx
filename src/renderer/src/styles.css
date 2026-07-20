@@ -993,7 +993,7 @@ a.btn {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 2;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1314,16 +1314,43 @@ a.btn {
   pointer-events: visibleStroke;
 }
 
+rect.element-hit {
+  pointer-events: all;
+}
+
+.text-select-preview {
+  pointer-events: none;
+}
+
+.text-select-preview.highlight {
+  fill: rgba(255, 214, 10, 0.45);
+}
+
+.text-select-preview.redact {
+  fill: rgba(16, 16, 18, 0.8);
+}
+
+.elements-layer text {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.element-marks,
+.element-find-rects {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.element-find-rects .find-hit {
+  position: absolute;
+}
+
 .element-outline {
   stroke: var(--element-accent);
   opacity: 0.9;
-}
-
-.element-bbox {
-  position: absolute;
-  border: 1px solid var(--element-accent);
-  border-radius: 10px;
-  pointer-events: none;
 }
 
 .element-pill {
@@ -1358,6 +1385,33 @@ a.btn {
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+.type-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  cursor: text;
+}
+
+.type-layer.edit-text-layer {
+  z-index: 7;
+}
+
+.text-editor {
+  position: absolute;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  outline: 1.5px dashed var(--element-accent);
+  outline-offset: 3px;
+  caret-color: var(--element-accent);
+  resize: none;
+  overflow: hidden;
+  white-space: pre;
 }
 
 .edit-select-layer {

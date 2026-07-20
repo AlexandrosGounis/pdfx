@@ -6,7 +6,6 @@ import {
   moveTo,
   popGraphicsState,
   pushGraphicsState,
-  rgb,
   setLineCap,
   setLineJoin,
   setLineWidth,
@@ -14,18 +13,14 @@ import {
   stroke
 } from 'pdf-lib'
 import type { PDFOperator, PDFPage } from 'pdf-lib'
-import type { PageElement } from '../elements/types'
-import { smoothPathSegments } from '../elements/geometry'
-import { normalizeRotation, visualPointToUser } from './redact/geometry'
+import type { InkElement } from '../../elements/types'
+import { smoothPathSegments } from '../../elements/geometry'
+import { normalizeRotation, visualPointToUser } from '../redact/geometry'
+import { hexColor } from './color'
 
 interface UserPoint {
   x: number
   y: number
-}
-
-function hexColor(hex: string): ReturnType<typeof rgb> {
-  const v = parseInt(hex.slice(1), 16)
-  return rgb(((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255)
 }
 
 function quadToCubic(from: UserPoint, control: UserPoint, to: UserPoint): PDFOperator {
@@ -36,8 +31,8 @@ function quadToCubic(from: UserPoint, control: UserPoint, to: UserPoint): PDFOpe
   return appendBezierCurve(c1x, c1y, c2x, c2y, to.x, to.y)
 }
 
-export function drawElements(page: PDFPage, elements: PageElement[] | undefined): void {
-  if (!elements || elements.length === 0) return
+export function drawInkElements(page: PDFPage, elements: InkElement[]): void {
+  if (elements.length === 0) return
   const box = page.getCropBox()
   const rot = normalizeRotation(page.getRotation().angle)
   const toUser = (p: { x: number; y: number }): UserPoint => visualPointToUser(p.x, p.y, box, rot)

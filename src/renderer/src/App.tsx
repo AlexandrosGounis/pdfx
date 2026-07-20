@@ -46,7 +46,7 @@ export default function App(): React.JSX.Element {
   const docs = collection.docs
   const layout = useMemo(() => computeLayout(docs), [docs])
 
-  const searchIndex = useSearchIndex(docs)
+  const searchIndex = useSearchIndex(docs, elementState.elements)
   const find = useFind(searchIndex.search, searchIndex.version)
   const findState = useMemo(
     () => ({
@@ -223,8 +223,11 @@ export default function App(): React.JSX.Element {
             onFieldChange={formState.setFieldValue}
             elements={elementState.elements}
             onAddInk={elementState.addInk}
+            onAddText={elementState.addText}
             onRemoveElement={elementState.removeElement}
             onMoveElement={elementState.moveElement}
+            onToggleTextMark={elementState.toggleTextMark}
+            onUpdateText={elementState.updateText}
             onActivePageChange={fullViewState.setHiddenPageId}
             onClose={fullViewState.closeFullView}
           />
