@@ -1,11 +1,20 @@
 import { useCallback } from 'react'
 import type { DocEntry } from '../../types'
 import type { View } from './geometry'
-import { clamp, fitInto, flipTo, MAX_ZOOM, MIN_ZOOM, TRANSITION_MS } from './geometry'
+import {
+  clamp,
+  EDIT_PAN_ALLOWANCE,
+  fitInto,
+  flipTo,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  TRANSITION_MS
+} from './geometry'
 
 interface ControlsOptions {
   scrollRef: React.RefObject<HTMLDivElement | null>
   closingRef: React.MutableRefObject<boolean>
+  editingRef: React.MutableRefObject<boolean>
   docsRef: React.MutableRefObject<DocEntry[]>
   vpRef: React.MutableRefObject<{ w: number; h: number }>
   curRef: React.MutableRefObject<{ di: number; pi: number }>
@@ -27,7 +36,7 @@ export interface FullViewControls {
 }
 
 export function useFullViewControls(opts: ControlsOptions): FullViewControls {
-  const { scrollRef, closingRef, docsRef, vpRef, curRef, phaseRef } = opts
+  const { scrollRef, closingRef, editingRef, docsRef, vpRef, curRef, phaseRef } = opts
   const { setView, setPhase, setFlip, setFlipTransition, setRevealed, onClose } = opts
 
   const resetView = useCallback(() => setView({ zoom: 1, x: 0, y: 0 }), [])
@@ -48,10 +57,11 @@ export function useFullViewControls(opts: ControlsOptions): FullViewControls {
         const dy = cy - vp.h / 2
         const maxX = Math.max(0, (b.w * nz - vp.w) / 2)
         const maxY = Math.max(0, (b.h * nz - vp.h) / 2)
+        const allowY = editingRef.current ? EDIT_PAN_ALLOWANCE : 0
         return {
           zoom: nz,
           x: clamp(dx * (1 - r) + r * v.x, -maxX, maxX),
-          y: clamp(dy * (1 - r) + r * v.y, -maxY, maxY)
+          y: clamp(dy * (1 - r) + r * v.y, -maxY, maxY + allowY)
         }
       })
     },
@@ -66,7 +76,8 @@ export function useFullViewControls(opts: ControlsOptions): FullViewControls {
     setView((v) => {
       const maxX = Math.max(0, (b.w * v.zoom - vp.w) / 2)
       const maxY = Math.max(0, (b.h * v.zoom - vp.h) / 2)
-      return { ...v, x: clamp(v.x + dx, -maxX, maxX), y: clamp(v.y + dy, -maxY, maxY) }
+      const allowY = editingRef.current ? EDIT_PAN_ALLOWANCE : 0
+      return { ...v, x: clamp(v.x + dx, -maxX, maxX), y: clamp(v.y + dy, -maxY, maxY + allowY) }
     })
   }, [])
 

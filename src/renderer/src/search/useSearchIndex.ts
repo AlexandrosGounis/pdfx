@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createSearchEngine, type SearchEngine, type SearchResult } from './engine'
+import { normalizeText } from './normalize'
 import { DEFAULT_OCR_LANGUAGE } from '../ocr/languages'
 import type { OcrWord } from '../ocr/types'
+import type { ElementMap } from '../elements/types'
 import type { DocEntry } from '../types'
 
 export type { SearchResult } from './engine'
@@ -16,7 +18,7 @@ export interface SearchIndex {
   getOcrWords: (sourceKey: string) => OcrWord[] | undefined
 }
 
-export function useSearchIndex(docs: DocEntry[]): SearchIndex {
+export function useSearchIndex(docs: DocEntry[], elements: ElementMap): SearchIndex {
   const [version, setVersion] = useState(0)
   const [ocrRemaining, setOcrRemaining] = useState(0)
   const [hasScanned, setHasScanned] = useState(false)
@@ -41,6 +43,18 @@ export function useSearchIndex(docs: DocEntry[]): SearchIndex {
   useEffect(() => {
     engine.reconcile(docs)
   }, [docs, engine])
+
+  useEffect(() => {
+    const byPage = new Map<string, string>()
+    for (const [pageId, list] of Object.entries(elements)) {
+      const text = list
+        .filter((e) => e.kind === 'text')
+        .map((e) => e.text)
+        .join('\n')
+      if (text) byPage.set(pageId, normalizeText(text))
+    }
+    engine.setElementTexts(byPage)
+  }, [elements, engine])
 
   useEffect(() => {
     return () => {
